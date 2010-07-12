@@ -1,0 +1,10 @@
+Changes
+IntervalTree.xs
+Makefile.PL
+MANIFEST
+ppport.h
+README
+t/Set-IntervalTree.t
+fallback/const-c.inc
+fallback/const-xs.inc
+lib/Set/IntervalTree.pm

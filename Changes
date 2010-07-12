@@ -1,0 +1,6 @@
+Revision history for Perl extension Set::IntervalTree.
+
+0.01  Mon Jul 12 15:58:33 2010
+	- original version; created by h2xs 1.23 with options
+		-n Set::IntervalTree -F -I. interval_tree.h
+
