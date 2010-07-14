@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <vector>
 #include <string>
+#include <iostream>
 
 #include "interval_tree.h"
 
@@ -12,27 +13,34 @@ int main(int argc, char *argv[])
   int low;
   int high;
 
-  IntervalTree<std::string> intervalTree;
-  int count = 1000000;
+  IntervalTree<int> intervalTree;
+  int count = 1000;
   int domain = 1000;
-  printf("Inserting %i nodes into [0,%i].\n", count, domain);
-  for(int i=0; i<count; i++)
-  {
+  std::cout << "Inserting " << count << 
+    " nodes into [0," << domain << "]." << std::endl;
+
+  srand(time(NULL));
+  for(int i=0; i<count; i++) {
     low = rand() % domain;
     high = (rand() % (domain-low)) + low;
     
-    intervalTree.insert("test", low, high);
-    //printf("Added: [%i,%i]\n", low,high);
-    if(!(i%25000)){printf("*");fflush(0);}
+    intervalTree.insert(i, low, high);
+    // std::cout << "Added: [" << low << "," << high << "]" << std::endl;
+    if(!(i%25000)){std::cout << "*";fflush(0);}
   }
-  printf("\n");
+  std::cout << std::endl;
   
   low = domain * 0.4f;
   high = domain * 0.5f;//10% of the domain is being tested
-  printf("Enumerating intervals between %i and %i\n", low, high);
-  std::vector<std::string> results = intervalTree.fetch(low,high);
+  std::cout << "Enumerating intervals between " << low 
+      << " and " << high << std::endl;
+  std::vector<int> results = intervalTree.fetch(low,high);
+  std::cout << results.size() << " intervals found." << std::endl;
 
-  printf("%zu intervals found.\n", results.size());
+  for(int i=0; i<results.size(); i++) {
+      std::cout << results[i] << ",";
+  }
+  std::cout << std::endl;
   return 0;
 }
 

@@ -21,7 +21,7 @@
 template<typename T>
 class IntervalTree {
 public:
-  enum color_t {RED, BLACK};
+  enum color_t {BLACK, RED};
 
   class Node {
     friend class IntervalTree<T>;
@@ -104,21 +104,30 @@ private:
 // your changes didn't mess anything up.
 // #define CHECK_INTERVAL_TREE_ASSUMPTIONS 1
 
-template<typename T> IntervalTree<T>::Node::Node(){}
+template<typename T> IntervalTree<T>::Node::Node() {
+  // std::cerr << "IntervalTree::Node default constructor: " << this << std::endl;
+}
 
 template<typename T>
 IntervalTree<T>::Node::Node(const T& value__, int lowPoint, int highPoint) 
   : value_ (value__),
     key(lowPoint), 
     high_(highPoint), 
-    maxHigh(highPoint) {}
+    maxHigh(highPoint) 
+{
+  // std::cerr << "IntervalTree::Node value constructor: " << this << std::endl;
+}
 
 template<typename T>
-IntervalTree<T>::Node::~Node(){}
+IntervalTree<T>::Node::~Node()
+{
+  // std::cerr << "IntervalTree::Node destructor: " << this << std::endl;
+}
 
 template<typename T>
 IntervalTree<T>::IntervalTree()
 {
+  // std::cerr << "constructor: this=" << this << std::endl;
   nil = new IntervalTree<T>::Node();
   nil->left = nil->right = nil->parent = nil;
   nil->color = BLACK;
@@ -202,8 +211,8 @@ void IntervalTree<T>::LeftRotate(IntervalTree<T>::Node* x) {
 #ifdef CHECK_INTERVAL_TREE_ASSUMPTIONS
   check();
 #elif defined(DEBUG_ASSERT)
-  assert(nil->color == RED || !"nil not red in ITLeftRotate");
-  assert((nil->maxHigh=std::numeric_limits<int>::min())
+  assert(nil->color != RED || !"nil not red in ITLeftRotate");
+  assert((nil->maxHigh!=std::numeric_limits<int>::min())
          || !"nil->maxHigh != std::numeric_limits<int>::min() in ITLeftRotate");
 #endif
 }
@@ -263,8 +272,8 @@ void IntervalTree<T>::RightRotate(IntervalTree<T>::Node* y) {
 #ifdef CHECK_INTERVAL_TREE_ASSUMPTIONS
   check();
 #elif defined(DEBUG_ASSERT)
-  assert(nil->color == RED || !"nil not red in ITRightRotate");
-  assert((nil->maxHigh=std::numeric_limits<int>::min())
+  assert(nil->color != RED || !"nil not red in ITRightRotate");
+  assert((nil->maxHigh!=std::numeric_limits<int>::min())
         || !"nil->maxHigh != std::numeric_limits<int>::min() in ITRightRotate");
 #endif
 }
@@ -311,8 +320,8 @@ void IntervalTree<T>::TreeInsertHelp(IntervalTree<T>::Node* z) {
 
 
 #if defined(DEBUG_ASSERT)
-  assert(nil->color == RED || !"nil not red in ITTreeInsertHelp");
-  assert((nil->maxHigh=std::numeric_limits<int>::min())
+  assert(nil->color != RED || !"nil not red in ITTreeInsertHelp");
+  assert((nil->maxHigh!=std::numeric_limits<int>::min())
         || !"nil->maxHigh != std::numeric_limits<int>::min() in ITTreeInsertHelp");
 #endif
 }
@@ -416,9 +425,9 @@ typename IntervalTree<T>::Node* IntervalTree<T>::insert(const T& newInterval, in
 #ifdef CHECK_INTERVAL_TREE_ASSUMPTIONS
   check();
 #elif defined(DEBUG_ASSERT)
-  assert(nil->color == RED || !"nil not red in ITTreeInsert");
-  assert(root->color == RED || !"root not red in ITTreeInsert");
-  assert((nil->maxHigh=std::numeric_limits<int>::min())
+  assert(nil->color != RED || !"nil not red in ITTreeInsert");
+  assert(root->color != RED || !"root not red in ITTreeInsert");
+  assert((nil->maxHigh!=std::numeric_limits<int>::min())
          || !"nil->maxHigh != std::numeric_limits<int>::min() in ITTreeInsert");
 #endif
 }
@@ -509,7 +518,11 @@ template<typename T>
 std::string IntervalTree<T>::Node::str(IntervalTree<T>::Node * nil,
                              IntervalTree<T>::Node * root) const {
   std::stringstream s;
-  s << value;
+
+  // TODO: figure out how to make this work
+//  s << value;
+  s << "Node";
+
   s << ", k=" << key << ", h=" << high_ << ", mH=" << maxHigh;
   s << "  l->key=";
   if( left == nil) s << "NULL"; else s << left->key;
@@ -532,6 +545,8 @@ void IntervalTree<T>::TreePrintHelper(IntervalTree<T>::Node* x, std::stringstrea
 
 template<typename T>
 IntervalTree<T>::~IntervalTree() {
+  // std::cerr << "destructor: this=" << this << std::endl;
+
   IntervalTree<T>::Node * x = root->left;
   std::vector<IntervalTree<T>::Node *> stuffToFree;
 
@@ -577,7 +592,8 @@ IntervalTree<T>::~IntervalTree() {
 template<typename T>
 std::string IntervalTree<T>::str() const {
   std::stringstream s;
-  return TreePrintHelper(root->left, s).str();
+  TreePrintHelper(root->left, s);
+  return s.str();
 }
 
 /***********************************************************************/
@@ -657,8 +673,8 @@ void IntervalTree<T>::DeleteFixUp(IntervalTree<T>::Node* x) {
 #ifdef CHECK_INTERVAL_TREE_ASSUMPTIONS
   check();
 #elif defined(DEBUG_ASSERT)
-  assert(nil->color == BLACK || !"nil not black in ITDeleteFixUp");
-  assert((nil->maxHigh=std::numeric_limits<int>::min())
+  assert(nil->color != BLACK || !"nil not black in ITDeleteFixUp");
+  assert((nil->maxHigh!=std::numeric_limits<int>::min())
          || !"nil->maxHigh != std::numeric_limits<int>::min() in ITDeleteFixUp");
 #endif
 }
@@ -684,7 +700,7 @@ template<typename T>
 T IntervalTree<T>::remove(IntervalTree<T>::Node * z){
   IntervalTree<T>::Node* y;
   IntervalTree<T>::Node* x;
-  const T& returnValue = z->value;
+  T returnValue = z->value();
 
   y= ((z->left == nil) || (z->right == nil)) ? z : GetSuccessorOf(z);
   x= (y->left == nil) ? y->right : y->left;
@@ -724,8 +740,8 @@ T IntervalTree<T>::remove(IntervalTree<T>::Node * z){
 #ifdef CHECK_INTERVAL_TREE_ASSUMPTIONS
     check();
 #elif defined(DEBUG_ASSERT)
-    assert(nil->color == BLACK || !"nil not black in ITDelete");
-    assert((nil->maxHigh=std::numeric_limits<int>::min())
+    assert(nil->color != BLACK || !"nil not black in ITDelete");
+    assert((nil->maxHigh!=std::numeric_limits<int>::min())
         && !"nil->maxHigh != std::numeric_limits<int>::min() in ITDelete");
 #endif
   } else {
@@ -735,8 +751,8 @@ T IntervalTree<T>::remove(IntervalTree<T>::Node * z){
 #ifdef CHECK_INTERVAL_TREE_ASSUMPTIONS
     check();
 #elif defined(DEBUG_ASSERT)
-    assert(nil->color == BLACK || !"nil not black in ITDelete");
-    assert((nil->maxHigh=std::numeric_limits<int>::min())
+    assert(nil->color != BLACK || !"nil not black in ITDelete");
+    assert((nil->maxHigh!=std::numeric_limits<int>::min())
         || !"nil->maxHigh != std::numeric_limits<int>::min() in ITDelete");
 #endif
   }
@@ -814,11 +830,10 @@ std::vector<T> IntervalTree<T>::fetch(int low, int high)  {
   // Possible speed up: add min field to prune right searches //
 
 #ifdef DEBUG_ASSERT
-  assert((recursionNodeStack.size() == 0)
+  assert((recursionNodeStack.size() == 1)
          || !"recursionStack not empty when entering IntervalTree::fetch");
 #endif
   currentParent = 0;
-  recursionNodeStack.push_back(IntervalTree<T>::it_recursion_node());
 
   while(stuffToDo) {
     if (Overlap(low,high,x->key,x->high_) ) {
@@ -826,30 +841,30 @@ std::vector<T> IntervalTree<T>::fetch(int low, int high)  {
       recursionNodeStack[currentParent].tryRightBranch=1;
     }
     if(x->left->maxHigh >= low) { // implies x != nil 
+      recursionNodeStack.push_back(IntervalTree<T>::it_recursion_node());
       recursionNodeStack.back().start_node = x;
       recursionNodeStack.back().tryRightBranch = 0;
       recursionNodeStack.back().parentIndex = currentParent;
-      currentParent = recursionNodeStack.size();
-      recursionNodeStack.push_back(IntervalTree<T>::it_recursion_node());
+      currentParent = recursionNodeStack.size()-1;
       x = x->left;
     } else {
       x = x->right;
     }
     stuffToDo = (x != nil);
-    while( (!stuffToDo) && (recursionNodeStack.size() > 0) ) {
+    while( (!stuffToDo) && (recursionNodeStack.size() > 1) ) {
         IntervalTree<T>::it_recursion_node back = recursionNodeStack.back();
         recursionNodeStack.pop_back();
 
         if(back.tryRightBranch) {
-          x=recursionNodeStack.back().start_node->right;
-          currentParent=recursionNodeStack.back().parentIndex;
+          x=back.start_node->right;
+          currentParent=back.parentIndex;
           recursionNodeStack[currentParent].tryRightBranch=1;
           stuffToDo = ( x != nil);
         }
     }
   }
 #ifdef DEBUG_ASSERT
-  assert((recursionNodeStack.size() == 0)
+  assert((recursionNodeStack.size() == 1)
          || !"recursionStack not empty when exiting IntervalTree::fetch");
 #endif
   return(enumResultStack);   
