@@ -9,6 +9,7 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <memory>
 
 //  The interval_tree.h file contains code for 
 //  interval trees implemented using red-black-trees as described in 
@@ -18,26 +19,26 @@
 // The low should return the lowest point of the interval and
 // the high should return the highest point of the interval.  
 
-template<typename T>
+template<typename T, typename N=long>
 class IntervalTree {
 public:
   enum color_t {BLACK, RED};
 
   class Node {
-    friend class IntervalTree<T>;
+    friend class IntervalTree<T,N>;
   public:
     std::string str(Node *, Node *) const;
     Node();
-    Node(const T&, int, int);
+    Node(const T&, N, N);
     virtual ~Node();
-    int low() const;
-    int high() const;
+    N low() const;
+    N high() const;
     T value() const;
   protected:
     T value_;
-    int key;
-    int high_;
-    int maxHigh;
+    N key;
+    N high_;
+    N maxHigh;
     color_t color;
     Node * left;
     Node * right;
@@ -49,24 +50,23 @@ public:
     /*  right branch in searching for intervals but possibly come back */
     /*  and check the left branch as well. */
     it_recursion_node(Node *start_node_=NULL, 
-        unsigned int parentIndex_=0, 
-        int tryRightBranch_=0)
+        size_t parentIndex_=0, 
+        bool tryRightBranch_=false)
       : start_node (start_node_),
         parentIndex (parentIndex_),
         tryRightBranch (tryRightBranch_) {}
 
     Node * start_node;
-    unsigned int parentIndex;
-    int tryRightBranch;
+    size_t parentIndex;
+    bool tryRightBranch;
   } ;
 
   IntervalTree();
   ~IntervalTree();
   std::string str() const;
-  T remove(IntervalTree<T>::Node *);
-  Node * insert(const T&, int, int);
-  std::vector<T> fetch(int low, int high);
-
+  T remove(IntervalTree<T,N>::Node *);
+  Node * insert(const T&, N, N);
+  std::vector<T> fetch(N, N);
 protected:
   Node * GetPredecessorOf(Node *) const;
   Node * GetSuccessorOf(Node *) const;
@@ -81,7 +81,7 @@ protected:
   Node * root;
   Node * nil;
 
-  int Overlap(int a1, int a2, int b1, int b2);
+  N Overlap(N a1, N a2, N b1, N b2);
   void LeftRotate(Node *);
   void RightRotate(Node *);
   void TreeInsertHelp(Node *);
@@ -89,12 +89,12 @@ protected:
   void FixUpMaxHigh(Node *);
   void DeleteFixUp(Node *);
   void CheckMaxHighFields(Node *) const;
-  int CheckMaxHighFieldsHelper(Node * y, 
-      const int currentHigh,
-      int match) const;
+  bool CheckMaxHighFieldsHelper(Node * y, 
+      const N currentHigh,
+      bool match) const;
 private:
-  std::vector<IntervalTree<T>::it_recursion_node> recursionNodeStack;
-  unsigned int currentParent;
+  std::vector<IntervalTree<T,N>::it_recursion_node> recursionNodeStack;
+  size_t currentParent;
 };
 
 // If the symbol CHECK_INTERVAL_TREE_ASSUMPTIONS is defined then the
@@ -104,12 +104,12 @@ private:
 // your changes didn't mess anything up.
 // #define CHECK_INTERVAL_TREE_ASSUMPTIONS 1
 
-template<typename T> IntervalTree<T>::Node::Node() {
+template<typename T, typename N> IntervalTree<T,N>::Node::Node() {
   // std::cerr << "IntervalTree::Node default constructor: " << this << std::endl;
 }
 
-template<typename T>
-IntervalTree<T>::Node::Node(const T& value__, int lowPoint, int highPoint) 
+template<typename T, typename N>
+IntervalTree<T,N>::Node::Node(const T& value__, N lowPoint, N highPoint) 
   : value_ (value__),
     key(lowPoint), 
     high_(highPoint), 
@@ -118,42 +118,42 @@ IntervalTree<T>::Node::Node(const T& value__, int lowPoint, int highPoint)
   // std::cerr << "IntervalTree::Node value constructor: " << this << std::endl;
 }
 
-template<typename T>
-IntervalTree<T>::Node::~Node()
+template<typename T, typename N>
+IntervalTree<T,N>::Node::~Node()
 {
   // std::cerr << "IntervalTree::Node destructor: " << this << std::endl;
 }
 
-template<typename T>
-IntervalTree<T>::IntervalTree()
+template<typename T, typename N>
+IntervalTree<T,N>::IntervalTree()
 {
   // std::cerr << "constructor: this=" << this << std::endl;
-  nil = new IntervalTree<T>::Node();
+  nil = new IntervalTree<T,N>::Node();
   nil->left = nil->right = nil->parent = nil;
   nil->color = BLACK;
-  nil->key = nil->high_ = nil->maxHigh = std::numeric_limits<int>::min();
+  nil->key = nil->high_ = nil->maxHigh = std::numeric_limits<N>::min();
   
-  root = new IntervalTree<T>::Node();
+  root = new IntervalTree<T,N>::Node();
   root->parent = root->left = root->right = nil;
-  root->key = root->high_ = root->maxHigh = std::numeric_limits<int>::max();
+  root->key = root->high_ = root->maxHigh = std::numeric_limits<N>::max();
   root->color=BLACK;
 
   /* the following are used for the fetch function */
-  recursionNodeStack.push_back(IntervalTree<T>::it_recursion_node());
+  recursionNodeStack.push_back(IntervalTree<T,N>::it_recursion_node());
 }
 
-template<typename T>
-int IntervalTree<T>::Node::low() const {
+template<typename T, typename N>
+N IntervalTree<T,N>::Node::low() const {
   return key;
 }
 
-template<typename T>
-int IntervalTree<T>::Node::high() const {
+template<typename T, typename N>
+N IntervalTree<T,N>::Node::high() const {
   return high_;
 }
 
-template<typename T>
-T IntervalTree<T>::Node::value() const {
+template<typename T, typename N>
+T IntervalTree<T,N>::Node::value() const {
   return value_;
 }
 
@@ -174,9 +174,9 @@ T IntervalTree<T>::Node::value() const {
 /*            after rotation. */
 /***********************************************************************/
 
-template<typename T>
-void IntervalTree<T>::LeftRotate(IntervalTree<T>::Node* x) {
-  IntervalTree<T>::Node* y;
+template<typename T, typename N>
+void IntervalTree<T,N>::LeftRotate(IntervalTree<T,N>::Node* x) {
+  IntervalTree<T,N>::Node* y;
  
   /*  I originally wrote this function to use the sentinel for */
   /*  nil to avoid checking for nil.  However this introduces a */
@@ -212,8 +212,8 @@ void IntervalTree<T>::LeftRotate(IntervalTree<T>::Node* x) {
   check();
 #elif defined(DEBUG_ASSERT)
   assert(nil->color != RED || !"nil not red in ITLeftRotate");
-  assert((nil->maxHigh!=std::numeric_limits<int>::min())
-         || !"nil->maxHigh != std::numeric_limits<int>::min() in ITLeftRotate");
+  assert((nil->maxHigh!=std::numeric_limits<N>::min())
+         || !"nil->maxHigh != std::numeric_limits<N>::min() in ITLeftRotate");
 #endif
 }
 
@@ -236,9 +236,9 @@ void IntervalTree<T>::LeftRotate(IntervalTree<T>::Node* x) {
 /***********************************************************************/
 
 
-template<typename T>
-void IntervalTree<T>::RightRotate(IntervalTree<T>::Node* y) {
-  IntervalTree<T>::Node* x;
+template<typename T, typename N>
+void IntervalTree<T,N>::RightRotate(IntervalTree<T,N>::Node* y) {
+  IntervalTree<T,N>::Node* x;
 
   /*  I originally wrote this function to use the sentinel for */
   /*  nil to avoid checking for nil.  However this introduces a */
@@ -273,8 +273,8 @@ void IntervalTree<T>::RightRotate(IntervalTree<T>::Node* y) {
   check();
 #elif defined(DEBUG_ASSERT)
   assert(nil->color != RED || !"nil not red in ITRightRotate");
-  assert((nil->maxHigh!=std::numeric_limits<int>::min())
-        || !"nil->maxHigh != std::numeric_limits<int>::min() in ITRightRotate");
+  assert((nil->maxHigh!=std::numeric_limits<N>::min())
+        || !"nil->maxHigh != std::numeric_limits<N>::min() in ITRightRotate");
 #endif
 }
 
@@ -293,11 +293,11 @@ void IntervalTree<T>::RightRotate(IntervalTree<T>::Node* y) {
 /*            by the InsertTree function and not by the user */
 /***********************************************************************/
 
-template<typename T>
-void IntervalTree<T>::TreeInsertHelp(IntervalTree<T>::Node* z) {
+template<typename T, typename N>
+void IntervalTree<T,N>::TreeInsertHelp(IntervalTree<T,N>::Node* z) {
   /*  This function should only be called by InsertITTree (see above) */
-  IntervalTree<T>::Node* x;
-  IntervalTree<T>::Node* y;
+  IntervalTree<T,N>::Node* x;
+  IntervalTree<T,N>::Node* y;
     
   z->left=z->right=nil;
   y=root;
@@ -321,8 +321,8 @@ void IntervalTree<T>::TreeInsertHelp(IntervalTree<T>::Node* z) {
 
 #if defined(DEBUG_ASSERT)
   assert(nil->color != RED || !"nil not red in ITTreeInsertHelp");
-  assert((nil->maxHigh!=std::numeric_limits<int>::min())
-        || !"nil->maxHigh != std::numeric_limits<int>::min() in ITTreeInsertHelp");
+  assert((nil->maxHigh!=std::numeric_limits<N>::min())
+        || !"nil->maxHigh != std::numeric_limits<N>::min() in ITTreeInsertHelp");
 #endif
 }
 
@@ -340,8 +340,8 @@ void IntervalTree<T>::TreeInsertHelp(IntervalTree<T>::Node* z) {
 /*            an insertion or deletion */
 /***********************************************************************/
 
-template<typename T>
-void IntervalTree<T>::FixUpMaxHigh(IntervalTree<T>::Node * x) {
+template<typename T, typename N>
+void IntervalTree<T,N>::FixUpMaxHigh(IntervalTree<T,N>::Node * x) {
   while(x != root) {
     x->maxHigh=std::max(x->high_,std::max(x->left->maxHigh,x->right->maxHigh));
     x=x->parent;
@@ -370,14 +370,14 @@ void IntervalTree<T>::FixUpMaxHigh(IntervalTree<T>::Node * x) {
 /*            info pointers and inserts it into the tree. */
 /***********************************************************************/
 
-template <typename T>
-typename IntervalTree<T>::Node* IntervalTree<T>::insert(const T& newInterval, int low, int high)
+template <typename T, typename N>
+typename IntervalTree<T,N>::Node* IntervalTree<T,N>::insert(const T& newInterval, N low, N high)
 {
-  IntervalTree<T>::Node * y;
-  IntervalTree<T>::Node * x;
-  IntervalTree<T>::Node * newNode;
+  IntervalTree<T,N>::Node * y;
+  IntervalTree<T,N>::Node * x;
+  IntervalTree<T,N>::Node * newNode;
 
-  x = new IntervalTree<T>::Node(newInterval, low, high);
+  x = new IntervalTree<T,N>::Node(newInterval, low, high);
   TreeInsertHelp(x);
   FixUpMaxHigh(x->parent);
   newNode = x;
@@ -427,8 +427,8 @@ typename IntervalTree<T>::Node* IntervalTree<T>::insert(const T& newInterval, in
 #elif defined(DEBUG_ASSERT)
   assert(nil->color != RED || !"nil not red in ITTreeInsert");
   assert(root->color != RED || !"root not red in ITTreeInsert");
-  assert((nil->maxHigh!=std::numeric_limits<int>::min())
-         || !"nil->maxHigh != std::numeric_limits<int>::min() in ITTreeInsert");
+  assert((nil->maxHigh!=std::numeric_limits<N>::min())
+         || !"nil->maxHigh != std::numeric_limits<N>::min() in ITTreeInsert");
 #endif
 }
 
@@ -445,10 +445,10 @@ typename IntervalTree<T>::Node* IntervalTree<T>::insert(const T& newInterval, in
 /*    Note:  uses the algorithm in _Introduction_To_Algorithms_ */
 /***********************************************************************/
   
-template<typename T> 
-typename IntervalTree<T>::Node * IntervalTree<T>::GetSuccessorOf(IntervalTree<T>::Node * x) const
+template<typename T, typename N> 
+typename IntervalTree<T,N>::Node * IntervalTree<T,N>::GetSuccessorOf(IntervalTree<T,N>::Node * x) const
 { 
-  IntervalTree<T>::Node* y;
+  IntervalTree<T,N>::Node* y;
 
   if (nil != (y = x->right)) { /* assignment to y is intentional */
     while(y->left != nil) { /* returns the minium of the right subtree of x */
@@ -479,9 +479,9 @@ typename IntervalTree<T>::Node * IntervalTree<T>::GetSuccessorOf(IntervalTree<T>
 /*    Note:  uses the algorithm in _Introduction_To_Algorithms_ */
 /***********************************************************************/
 
-template<typename T>
-typename IntervalTree<T>::Node * IntervalTree<T>::GetPredecessorOf(IntervalTree<T>::Node * x) const {
-  IntervalTree<T>::Node* y;
+template<typename T, typename N>
+typename IntervalTree<T,N>::Node * IntervalTree<T,N>::GetPredecessorOf(IntervalTree<T,N>::Node * x) const {
+  IntervalTree<T,N>::Node* y;
 
   if (nil != (y = x->left)) { /* assignment to y is intentional */
     while(y->right != nil) { /* returns the maximum of the left subtree of x */
@@ -514,15 +514,12 @@ typename IntervalTree<T>::Node * IntervalTree<T>::GetPredecessorOf(IntervalTree<
 /*    Note:    This function should only be called from ITTreePrint */
 /***********************************************************************/
 
-template<typename T>
-std::string IntervalTree<T>::Node::str(IntervalTree<T>::Node * nil,
-                             IntervalTree<T>::Node * root) const {
+template<typename T, typename N>
+std::string IntervalTree<T,N>::Node::str(IntervalTree<T,N>::Node * nil,
+                             IntervalTree<T,N>::Node * root) const {
   std::stringstream s;
 
-  // TODO: figure out how to make this work
-//  s << value;
-  s << "Node";
-
+  s << value_;
   s << ", k=" << key << ", h=" << high_ << ", mH=" << maxHigh;
   s << "  l->key=";
   if( left == nil) s << "NULL"; else s << left->key;
@@ -534,8 +531,8 @@ std::string IntervalTree<T>::Node::str(IntervalTree<T>::Node * nil,
   return s.str();
 }
 
-template<typename T>
-void IntervalTree<T>::TreePrintHelper(IntervalTree<T>::Node* x, std::stringstream &s) const {
+template<typename T, typename N>
+void IntervalTree<T,N>::TreePrintHelper(IntervalTree<T,N>::Node* x, std::stringstream &s) const {
   if (x != nil) {
     TreePrintHelper(x->left, s);
     s << x->str(nil,root);
@@ -543,12 +540,12 @@ void IntervalTree<T>::TreePrintHelper(IntervalTree<T>::Node* x, std::stringstrea
   }
 }
 
-template<typename T>
-IntervalTree<T>::~IntervalTree() {
+template<typename T, typename N>
+IntervalTree<T,N>::~IntervalTree() {
   // std::cerr << "destructor: this=" << this << std::endl;
 
-  IntervalTree<T>::Node * x = root->left;
-  std::vector<IntervalTree<T>::Node *> stuffToFree;
+  IntervalTree<T,N>::Node * x = root->left;
+  std::vector<IntervalTree<T,N>::Node *> stuffToFree;
 
   if (x != nil) {
     if (x->left != nil) {
@@ -589,8 +586,8 @@ IntervalTree<T>::~IntervalTree() {
 /**/
 /***********************************************************************/
 
-template<typename T>
-std::string IntervalTree<T>::str() const {
+template<typename T, typename N>
+std::string IntervalTree<T,N>::str() const {
   std::stringstream s;
   TreePrintHelper(root->left, s);
   return s.str();
@@ -612,10 +609,10 @@ std::string IntervalTree<T>::str() const {
 /*    The algorithm from this function is from _Introduction_To_Algorithms_ */
 /***********************************************************************/
 
-template<typename T>
-void IntervalTree<T>::DeleteFixUp(IntervalTree<T>::Node* x) {
-  IntervalTree<T>::Node * w;
-  IntervalTree<T>::Node * rootLeft = root->left;
+template<typename T,typename N>
+void IntervalTree<T,N>::DeleteFixUp(IntervalTree<T,N>::Node* x) {
+  IntervalTree<T,N>::Node * w;
+  IntervalTree<T,N>::Node * rootLeft = root->left;
 
   while( (x->color == BLACK) && (rootLeft != x)) {
     if (x == x->parent->left) {
@@ -674,8 +671,8 @@ void IntervalTree<T>::DeleteFixUp(IntervalTree<T>::Node* x) {
   check();
 #elif defined(DEBUG_ASSERT)
   assert(nil->color != BLACK || !"nil not black in ITDeleteFixUp");
-  assert((nil->maxHigh!=std::numeric_limits<int>::min())
-         || !"nil->maxHigh != std::numeric_limits<int>::min() in ITDeleteFixUp");
+  assert((nil->maxHigh!=std::numeric_limits<N>::min())
+         || !"nil->maxHigh != std::numeric_limits<N>::min() in ITDeleteFixUp");
 #endif
 }
 
@@ -696,10 +693,10 @@ void IntervalTree<T>::DeleteFixUp(IntervalTree<T>::Node* x) {
 /*    The algorithm from this function is from _Introduction_To_Algorithms_ */
 /***********************************************************************/
 
-template<typename T>
-T IntervalTree<T>::remove(IntervalTree<T>::Node * z){
-  IntervalTree<T>::Node* y;
-  IntervalTree<T>::Node* x;
+template<typename T, typename N>
+T IntervalTree<T,N>::remove(IntervalTree<T,N>::Node * z){
+  IntervalTree<T,N>::Node* y;
+  IntervalTree<T,N>::Node* x;
   T returnValue = z->value();
 
   y= ((z->left == nil) || (z->right == nil)) ? z : GetSuccessorOf(z);
@@ -720,7 +717,7 @@ T IntervalTree<T>::remove(IntervalTree<T>::Node * z){
 #endif
     /* y is the node to splice out and x is its child */
   
-    y->maxHigh = std::numeric_limits<int>::min();
+    y->maxHigh = std::numeric_limits<N>::min();
     y->left=z->left;
     y->right=z->right;
     y->parent=z->parent;
@@ -741,8 +738,8 @@ T IntervalTree<T>::remove(IntervalTree<T>::Node * z){
     check();
 #elif defined(DEBUG_ASSERT)
     assert(nil->color != BLACK || !"nil not black in ITDelete");
-    assert((nil->maxHigh!=std::numeric_limits<int>::min())
-        && !"nil->maxHigh != std::numeric_limits<int>::min() in ITDelete");
+    assert((nil->maxHigh!=std::numeric_limits<N>::min())
+        && !"nil->maxHigh != std::numeric_limits<N>::min() in ITDelete");
 #endif
   } else {
     FixUpMaxHigh(x->parent);
@@ -752,8 +749,8 @@ T IntervalTree<T>::remove(IntervalTree<T>::Node * z){
     check();
 #elif defined(DEBUG_ASSERT)
     assert(nil->color != BLACK || !"nil not black in ITDelete");
-    assert((nil->maxHigh!=std::numeric_limits<int>::min())
-        || !"nil->maxHigh != std::numeric_limits<int>::min() in ITDelete");
+    assert((nil->maxHigh!=std::numeric_limits<N>::min())
+        || !"nil->maxHigh != std::numeric_limits<N>::min() in ITDelete");
 #endif
   }
   return returnValue;
@@ -773,8 +770,8 @@ T IntervalTree<T>::remove(IntervalTree<T>::Node * z){
 /*    EFFECT:  returns 1 if the intervals overlap, and 0 otherwise */
 /***********************************************************************/
 
-template<typename T>
-int IntervalTree<T>::Overlap(int a1, int a2, int b1, int b2) {
+template<typename T, typename N>
+N IntervalTree<T,N>::Overlap(N a1, N a2, N b1, N b2) {
   if (a1 <= b1) {
     return( (b1 <= a2) );
   } else {
@@ -821,11 +818,11 @@ int IntervalTree<T>::Overlap(int a1, int a2, int b1, int b2) {
 /*  of the left child of root we must recursively check the right subtree */
 /*  of the left child of root as well as the right child of root. */
 
-template<typename T>
-std::vector<T> IntervalTree<T>::fetch(int low, int high)  {
+template<typename T, typename N>
+std::vector<T> IntervalTree<T,N>::fetch(N low, N high)  {
   std::vector<T> enumResultStack;
-  IntervalTree<T>::Node* x=root->left;
-  int stuffToDo = (x != nil);
+  IntervalTree<T,N>::Node* x=root->left;
+  bool stuffToDo = (x != nil);
   
   // Possible speed up: add min field to prune right searches //
 
@@ -838,12 +835,12 @@ std::vector<T> IntervalTree<T>::fetch(int low, int high)  {
   while(stuffToDo) {
     if (Overlap(low,high,x->key,x->high_) ) {
       enumResultStack.push_back(x->value());
-      recursionNodeStack[currentParent].tryRightBranch=1;
+      recursionNodeStack[currentParent].tryRightBranch=true;
     }
     if(x->left->maxHigh >= low) { // implies x != nil 
-      recursionNodeStack.push_back(IntervalTree<T>::it_recursion_node());
+      recursionNodeStack.push_back(IntervalTree<T,N>::it_recursion_node());
       recursionNodeStack.back().start_node = x;
-      recursionNodeStack.back().tryRightBranch = 0;
+      recursionNodeStack.back().tryRightBranch = false;
       recursionNodeStack.back().parentIndex = currentParent;
       currentParent = recursionNodeStack.size()-1;
       x = x->left;
@@ -852,13 +849,13 @@ std::vector<T> IntervalTree<T>::fetch(int low, int high)  {
     }
     stuffToDo = (x != nil);
     while( (!stuffToDo) && (recursionNodeStack.size() > 1) ) {
-        IntervalTree<T>::it_recursion_node back = recursionNodeStack.back();
+        IntervalTree<T,N>::it_recursion_node back = recursionNodeStack.back();
         recursionNodeStack.pop_back();
 
         if(back.tryRightBranch) {
           x=back.start_node->right;
           currentParent=back.parentIndex;
-          recursionNodeStack[currentParent].tryRightBranch=1;
+          recursionNodeStack[currentParent].tryRightBranch=true;
           stuffToDo = ( x != nil);
         }
     }
@@ -872,18 +869,18 @@ std::vector<T> IntervalTree<T>::fetch(int low, int high)  {
         
 
 
-template<typename T>
-int IntervalTree<T>::CheckMaxHighFieldsHelper(IntervalTree<T>::Node * y, 
-                                    const int currentHigh,
-                                    int match) const
+template<typename T, typename N>
+bool IntervalTree<T,N>::CheckMaxHighFieldsHelper(IntervalTree<T,N>::Node * y, 
+                                    const N currentHigh,
+                                    bool match) const
 {
   if (y != nil) {
     match = CheckMaxHighFieldsHelper(y->left,currentHigh,match) ?
-      1 : match;
+      true : match;
     if (y->high_ == currentHigh)
-      match = 1;
+      match = true;
     match = CheckMaxHighFieldsHelper(y->right,currentHigh,match) ?
-      1 : match;
+      true : match;
   }
   return match;
 }
@@ -892,19 +889,19 @@ int IntervalTree<T>::CheckMaxHighFieldsHelper(IntervalTree<T>::Node * y,
 
 /* Make sure the maxHigh fields for everything makes sense. *
  * If something is wrong, print a warning and exit */
-template<typename T>
-void IntervalTree<T>::CheckMaxHighFields(IntervalTree<T>::Node * x) const {
+template<typename T, typename N>
+void IntervalTree<T,N>::CheckMaxHighFields(IntervalTree<T,N>::Node * x) const {
   if (x != nil) {
     CheckMaxHighFields(x->left);
-    if(!(CheckMaxHighFieldsHelper(x,x->maxHigh,0) > 0)) {
+    if(!(CheckMaxHighFieldsHelper(x,x->maxHigh,false) > 0)) {
       assert(0);
     }
     CheckMaxHighFields(x->right);
   }
 }
 
-template<typename T>
-void IntervalTree<T>::check() const {
+template<typename T, typename N>
+void IntervalTree<T,N>::check() const {
  CheckMaxHighFields(root->left);
 }
 

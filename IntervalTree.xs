@@ -11,12 +11,17 @@ extern "C" {
 #endif
 
 #include <tr1/memory>
-#include <memory>
 #include <string>
 #include <vector>
 #include <iostream>
+#include <sstream>
 
 #include <interval_tree.h>
+
+std::ostream& operator<<(std::ostream &out, const std::tr1::shared_ptr<SV> &value) {
+  out << "Node:" << value.get();
+  return out;
+}
 
 class SV_deleter {
   public:
@@ -43,23 +48,13 @@ PerlIntervalTree::str()
   OUTPUT:
     RETVAL
 
-PerlIntervalTree_Node *
+void
 PerlIntervalTree::insert(SV *value, int low, int high)
   PROTOTYPE: $;$;$
   CODE: 
     SvREFCNT_inc(value);
     std::tr1::shared_ptr<SV> ptr(value, SV_deleter());
-    RETVAL = THIS->insert(ptr, low, high);
-  OUTPUT:
-    RETVAL
-
-SV *
-PerlIntervalTree::remove(PerlIntervalTree_Node *node)
-  PROTOTYPE: $
-  CODE:
-    RETVAL = THIS->remove(node).get();
-  OUTPUT:
-    RETVAL
+    THIS->insert(ptr, low, high);
 
 AV *
 PerlIntervalTree::fetch(int low, int high)
