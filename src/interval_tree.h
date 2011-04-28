@@ -9,7 +9,6 @@
 #include <sstream>
 #include <vector>
 #include <string>
-#include <memory>
 
 //  The interval_tree.h file contains code for 
 //  interval trees implemented using red-black-trees as described in 
@@ -67,6 +66,7 @@ public:
   T remove(IntervalTree<T,N>::Node *);
   Node * insert(const T&, N, N);
   std::vector<T> fetch(N, N);
+  std::vector<T> window(N, N);
 protected:
   Node * GetPredecessorOf(Node *) const;
   Node * GetSuccessorOf(Node *) const;
@@ -82,6 +82,7 @@ protected:
   Node * nil;
 
   N Overlap(N a1, N a2, N b1, N b2);
+  N Contain(N a1, N a2, N b1, N b2);
   void LeftRotate(Node *);
   void RightRotate(Node *);
   void TreeInsertHelp(Node *);
@@ -760,10 +761,10 @@ T IntervalTree<T,N>::remove(IntervalTree<T,N>::Node * z){
 /***********************************************************************/
 /*  FUNCTION:  Overlap */
 /**/
-/*    INPUTS:  [a1,a2] and [b1,b2] are the low and high endpoints of two */
-/*             closed intervals.  */
+/*    INPUTS:  [a1,a2) and [b1,b2) are the low and high endpoints of two */
+/*             intervals.  */
 /**/
-/*    OUTPUT:  stack containing pointers to the nodes between [low,high] */
+/*    OUTPUT:  stack containing pointers to the nodes between [low,high) */
 /**/
 /*    Modifies Input: none */
 /**/
@@ -772,27 +773,28 @@ T IntervalTree<T,N>::remove(IntervalTree<T,N>::Node * z){
 
 template<typename T, typename N>
 N IntervalTree<T,N>::Overlap(N a1, N a2, N b1, N b2) {
-  if (a1 <= b1) {
-    return( (b1 <= a2) );
-  } else {
-    return( (a1 <= b2) );
-  }
+  return a1 <= b2 && b1 <= a2;
 }
 
+
+template<typename T, typename N>
+N IntervalTree<T,N>::Contain(N a1, N a2, N b1, N b2) {
+  return a1 <= b1 && b2 <= a2;
+}
 
 /***********************************************************************/
 /*  FUNCTION:  fetch */
 /**/
 /*    INPUTS:  tree is the tree to look for intervals overlapping the */
-/*             closed interval [low,high]  */
+/*             interval [low,high)  */
 /**/
 /*    OUTPUT:  stack containing pointers to the nodes overlapping */
-/*             [low,high] */
+/*             [low,high) */
 /**/
 /*    Modifies Input: none */
 /**/
 /*    EFFECT:  Returns a stack containing pointers to nodes containing */
-/*             intervals which overlap [low,high] in O(max(N,k*log(N))) */
+/*             intervals which overlap [low,high) in O(max(N,k*log(N))) */
 /*             where N is the number of intervals in the tree and k is  */
 /*             the number of overlapping intervals                      */
 /**/
@@ -867,7 +869,54 @@ std::vector<T> IntervalTree<T,N>::fetch(N low, N high)  {
   return(enumResultStack);   
 }
         
+template<typename T, typename N>
+std::vector<T> IntervalTree<T,N>::window(N low, N high)  {
+  std::vector<T> enumResultStack;
+  IntervalTree<T,N>::Node* x=root->left;
+  bool stuffToDo = (x != nil);
+  
+  // Possible speed up: add min field to prune right searches //
 
+#ifdef DEBUG_ASSERT
+  assert((recursionNodeStack.size() == 1)
+         || !"recursionStack not empty when entering IntervalTree::window");
+#endif
+  currentParent = 0;
+
+  while(stuffToDo) {
+    if (Contain(low,high,x->key,x->high_) ) {
+      enumResultStack.push_back(x->value());
+      recursionNodeStack[currentParent].tryRightBranch=true;
+    }
+    if(x->left->maxHigh >= low) { // implies x != nil 
+      recursionNodeStack.push_back(IntervalTree<T,N>::it_recursion_node());
+      recursionNodeStack.back().start_node = x;
+      recursionNodeStack.back().tryRightBranch = false;
+      recursionNodeStack.back().parentIndex = currentParent;
+      currentParent = recursionNodeStack.size()-1;
+      x = x->left;
+    } else {
+      x = x->right;
+    }
+    stuffToDo = (x != nil);
+    while( (!stuffToDo) && (recursionNodeStack.size() > 1) ) {
+        IntervalTree<T,N>::it_recursion_node back = recursionNodeStack.back();
+        recursionNodeStack.pop_back();
+
+        if(back.tryRightBranch) {
+          x=back.start_node->right;
+          currentParent=back.parentIndex;
+          recursionNodeStack[currentParent].tryRightBranch=true;
+          stuffToDo = ( x != nil);
+        }
+    }
+  }
+#ifdef DEBUG_ASSERT
+  assert((recursionNodeStack.size() == 1)
+         || !"recursionStack not empty when exiting IntervalTree::fetch");
+#endif
+  return(enumResultStack);   
+}
 
 template<typename T, typename N>
 bool IntervalTree<T,N>::CheckMaxHighFieldsHelper(IntervalTree<T,N>::Node * y, 

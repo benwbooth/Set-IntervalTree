@@ -73,6 +73,23 @@ PerlIntervalTree::fetch(int low, int high)
   OUTPUT:
     RETVAL
 
+AV *
+PerlIntervalTree::window(int low, int high)
+  PROTOTYPE: $;$
+  CODE:
+    RETVAL = newAV();
+    sv_2mortal((SV*)RETVAL);
+    std::vector<std::tr1::shared_ptr<SV> > intervals = THIS->window(low, high);
+    for (size_t i=0; i<intervals.size(); i++) {
+      SV *value = intervals[i].get();
+      // std::cerr << "refcnt for " << value << " is " << SvREFCNT(value) << std::endl;
+      SvREFCNT_inc(value);
+      av_push(RETVAL, value);
+      // std::cerr << "refcnt for " << value << " is " << SvREFCNT(value) << std::endl;
+    }
+  OUTPUT:
+    RETVAL
+
 void 
 PerlIntervalTree::DESTROY()
 

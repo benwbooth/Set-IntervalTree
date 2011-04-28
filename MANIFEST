@@ -3,5 +3,10 @@ IntervalTree.xs
 Makefile.PL
 MANIFEST
 README
+typemap
+perlobject.map
+src/interval_tree.h
+src/test_main.cc
+src/Makefile
 t/Set-IntervalTree.t
 lib/Set/IntervalTree.pm

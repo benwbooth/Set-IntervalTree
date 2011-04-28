@@ -27,7 +27,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -65,37 +65,65 @@ __END__
 
 =head1 NAME
 
-Set::IntervalTree - Perl extension for blah blah blah
+Set::IntervalTree - Perform range-based lookups on sets of ranges.
 
 =head1 SYNOPSIS
 
   use Set::IntervalTree;
-  blah blah blah
+  my $tree = Set::IntervalTree->new;
+  $tree->insert("ID1",100,200);
+  $tree->insert(2,50,100);
+  $tree->insert({id=>3},520,700);
+  $tree->insert($some_obj,1000,1100);
+
+  my $results = $tree->fetch(400,800);
+  print scalar(@$results)." intervals found.\n";
 
 =head1 DESCRIPTION
 
-Stub documentation for Set::IntervalTree, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+Set::IntervalTree uses Interval Trees to store and efficiently 
+look up ranges using a range-based lookup.
 
-Blah blah blah.
+=head1 EXPORTS
 
-=head2 EXPORT
+Nothing.
 
-None by default.
+=head1 METHODS
 
+my $tree = Set::IntervalTree->new;
 
+  Creates a new interval tree object.
+
+$tree->insert($object, $low, $high);
+
+  Insert a range into the interval tree and associate it with a 
+  perl scalar.
+
+  $object can be any perl scalar. This is what will be returned by fetch().
+  $low is the lower bound of the range.
+  $high is the upper bound of the range.
+
+  Ranges are represented as both-ends closed intervals.
+
+my $results = $tree->fetch($low, $high)
+
+  Return an arrayref of perl objects whose ranges overlap 
+  the specified range.
+
+  $low is the lower bound of the region to query.
+  $high is the upper bound of the region to query.
+
+=head1 Limitations
+
+I still haven't implemented a $tree->remove() method to remove ranges 
+from a tree.
+
+A $tree->print() serialization method might be useful for debugging.
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+The source code for this module contains a reusable template-based 
+C++ header for Interval trees that might be useful.
 
 =head1 AUTHOR
 
