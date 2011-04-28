@@ -77,6 +77,7 @@ Set::IntervalTree - Perform range-based lookups on sets of ranges.
   $tree->insert($some_obj,1000,1100);
 
   my $results = $tree->fetch(400,800);
+  my $window = $tree->window(100,200);
   print scalar(@$results)." intervals found.\n";
 
 =head1 DESCRIPTION
@@ -109,6 +110,14 @@ my $results = $tree->fetch($low, $high)
 
   Return an arrayref of perl objects whose ranges overlap 
   the specified range.
+
+  $low is the lower bound of the region to query.
+  $high is the upper bound of the region to query.
+
+my $results = $tree->window($low, $high)
+
+  Return an arrayref of perl objects whose ranges are completely contained
+  witin the specified range.
 
   $low is the lower bound of the region to query.
   $high is the upper bound of the region to query.
