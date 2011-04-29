@@ -111,7 +111,7 @@ $tree->insert($object, $low, $high);
   $low is the lower bound of the range.
   $high is the upper bound of the range.
 
-  Ranges are represented as both-ends closed intervals.
+  Ranges are represented as half-closed integer intervals.
 
 my $results = $tree->fetch($low, $high)
 

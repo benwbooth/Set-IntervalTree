@@ -42,7 +42,7 @@ class RemoveFunctor {
       PUSHMARK(SP);
       XPUSHs(value.get());
       XPUSHs(sv_2mortal(newSViv(low)));
-      XPUSHs(sv_2mortal(newSViv(high)));
+      XPUSHs(sv_2mortal(newSViv(high+1)));
       PUTBACK;
 
       // get result from callback and return
@@ -90,7 +90,7 @@ PerlIntervalTree::insert(SV *value, int low, int high)
   CODE: 
     SvREFCNT_inc(value);
     std::tr1::shared_ptr<SV> ptr(value, SV_deleter());
-    THIS->insert(ptr, low, high);
+    THIS->insert(ptr, low, high-1);
 
 AV *
 PerlIntervalTree::remove(int low, int high, ...)
@@ -102,7 +102,7 @@ PerlIntervalTree::remove(int low, int high, ...)
       SV *callback = ST(3); 
       RemoveFunctor remove_functor(callback);
       std::vector<std::tr1::shared_ptr<SV> > removed;
-      THIS->remove(low, high, remove_functor, removed);
+      THIS->remove(low, high-1, remove_functor, removed);
 
       for (std::vector<std::tr1::shared_ptr<SV> >::const_iterator
           i=removed.begin(); i!=removed.end(); ++i) 
@@ -114,7 +114,7 @@ PerlIntervalTree::remove(int low, int high, ...)
     }
     else {
       std::vector<std::tr1::shared_ptr<SV> > removed; 
-      THIS->remove(low, high, removed);
+      THIS->remove(low, high-1, removed);
 
       for (std::vector<std::tr1::shared_ptr<SV> >::const_iterator
           i=removed.begin(); i!=removed.end(); ++i) 
@@ -134,7 +134,7 @@ PerlIntervalTree::fetch(int low, int high)
     RETVAL = newAV();
     sv_2mortal((SV*)RETVAL);
     std::vector<std::tr1::shared_ptr<SV> > intervals;
-    THIS->fetch(low, high, intervals);
+    THIS->fetch(low, high-1, intervals);
     for (size_t i=0; i<intervals.size(); i++) {
       SV *value = intervals[i].get();
       SvREFCNT_inc(value);
@@ -150,7 +150,7 @@ PerlIntervalTree::fetch_window(int low, int high)
     RETVAL = newAV();
     sv_2mortal((SV*)RETVAL);
     std::vector<std::tr1::shared_ptr<SV> > intervals;
-    THIS->fetch_window(low, high, intervals);
+    THIS->fetch_window(low, high-1, intervals);
     for (size_t i=0; i<intervals.size(); i++) {
       SV *value = intervals[i].get();
       SvREFCNT_inc(value);
@@ -177,7 +177,7 @@ PerlIntervalTree_Node::low()
 int
 PerlIntervalTree_Node::high()
   CODE:
-    RETVAL = THIS->high();
+    RETVAL = THIS->high()+1;
   OUTPUT:
     RETVAL
 
