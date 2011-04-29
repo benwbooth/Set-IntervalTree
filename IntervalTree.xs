@@ -26,8 +26,44 @@ std::ostream& operator<<(std::ostream &out, const std::tr1::shared_ptr<SV> &valu
 class SV_deleter {
   public:
     void operator() (SV *value) {
-      // std::cerr << "Decrementing SV " << value << std::endl;
       SvREFCNT_dec(value);
+    }
+};
+
+class RemoveFunctor {
+  SV *callback;
+  public:
+    RemoveFunctor(SV *callback_) : callback(callback_) {}
+    bool operator()(std::tr1::shared_ptr<SV> value, int low, int high) const {
+      // pass args into callback
+      dSP;
+      ENTER;
+      SAVETMPS;
+      PUSHMARK(SP);
+      XPUSHs(value.get());
+      XPUSHs(sv_2mortal(newSViv(low)));
+      XPUSHs(sv_2mortal(newSViv(high)));
+      PUTBACK;
+
+      // get result from callback and return
+      I32 count = call_sv(callback, G_SCALAR);
+
+      SPAGAIN;
+
+      if (count < 1) {
+        PUTBACK;
+        FREETMPS;
+        LEAVE;
+        return false;
+      }
+
+      SV *retval_sv = POPs;
+      bool retval = SvTRUE(retval_sv);
+
+      PUTBACK;
+      FREETMPS;
+      LEAVE;
+      return retval;
     }
 };
 
@@ -57,35 +93,68 @@ PerlIntervalTree::insert(SV *value, int low, int high)
     THIS->insert(ptr, low, high);
 
 AV *
-PerlIntervalTree::fetch(int low, int high)
-  PROTOTYPE: $;$
+PerlIntervalTree::remove(int low, int high, ...)
   CODE:
     RETVAL = newAV();
     sv_2mortal((SV*)RETVAL);
-    std::vector<std::tr1::shared_ptr<SV> > intervals = THIS->fetch(low, high);
-    for (size_t i=0; i<intervals.size(); i++) {
-      SV *value = intervals[i].get();
-      // std::cerr << "refcnt for " << value << " is " << SvREFCNT(value) << std::endl;
-      SvREFCNT_inc(value);
-      av_push(RETVAL, value);
-      // std::cerr << "refcnt for " << value << " is " << SvREFCNT(value) << std::endl;
+
+    if (items > 3) {
+      SV *callback = ST(3); 
+      RemoveFunctor remove_functor(callback);
+      std::vector<std::tr1::shared_ptr<SV> > removed;
+      THIS->remove(low, high, remove_functor, removed);
+
+      for (std::vector<std::tr1::shared_ptr<SV> >::const_iterator
+          i=removed.begin(); i!=removed.end(); ++i) 
+      {
+        SV *value = i->get();
+        SvREFCNT_inc(value);
+        av_push(RETVAL, value);
+      }
+    }
+    else {
+      std::vector<std::tr1::shared_ptr<SV> > removed; 
+      THIS->remove(low, high, removed);
+
+      for (std::vector<std::tr1::shared_ptr<SV> >::const_iterator
+          i=removed.begin(); i!=removed.end(); ++i) 
+      {
+        SV *value = i->get();
+        SvREFCNT_inc(value);
+        av_push(RETVAL, value);
+      }
     }
   OUTPUT:
     RETVAL
 
 AV *
-PerlIntervalTree::window(int low, int high)
+PerlIntervalTree::fetch(int low, int high)
   PROTOTYPE: $;$
   CODE:
     RETVAL = newAV();
     sv_2mortal((SV*)RETVAL);
-    std::vector<std::tr1::shared_ptr<SV> > intervals = THIS->window(low, high);
+    std::vector<std::tr1::shared_ptr<SV> > intervals;
+    THIS->fetch(low, high, intervals);
     for (size_t i=0; i<intervals.size(); i++) {
       SV *value = intervals[i].get();
-      // std::cerr << "refcnt for " << value << " is " << SvREFCNT(value) << std::endl;
       SvREFCNT_inc(value);
       av_push(RETVAL, value);
-      // std::cerr << "refcnt for " << value << " is " << SvREFCNT(value) << std::endl;
+    }
+  OUTPUT:
+    RETVAL
+
+AV *
+PerlIntervalTree::fetch_window(int low, int high)
+  PROTOTYPE: $;$
+  CODE:
+    RETVAL = newAV();
+    sv_2mortal((SV*)RETVAL);
+    std::vector<std::tr1::shared_ptr<SV> > intervals;
+    THIS->fetch_window(low, high, intervals);
+    for (size_t i=0; i<intervals.size(); i++) {
+      SV *value = intervals[i].get();
+      SvREFCNT_inc(value);
+      av_push(RETVAL, value);
     }
   OUTPUT:
     RETVAL

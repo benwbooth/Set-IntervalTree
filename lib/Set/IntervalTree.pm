@@ -36,7 +36,7 @@ sub AUTOLOAD {
     my $constname;
     our $AUTOLOAD;
     ($constname = $AUTOLOAD) =~ s/.*:://;
-    croak "&Set::IntervalTree::constant not defined" if $constname eq 'constant';
+    croak "&Set::IntervalTree::constant not defined!" if $constname eq 'constant';
     my ($error, $val) = constant($constname);
     if ($error) { croak $error; }
     {

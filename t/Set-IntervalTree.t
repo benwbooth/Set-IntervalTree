@@ -43,6 +43,17 @@ my $results = $tree->fetch($low,$high);
 ok($results);
 print scalar(@$results)." intervals found.\n";
 
+print "Removing all values greater than 100\n";
+my $removed = $tree->remove(0, $domain, sub {
+    my ($i, $low, $high) = @_;
+    print "\$i=$i, \$low=$low, \$high=$high\n";
+    return $i > 100;
+  });
+#my $removed = $tree->remove($start, $domain);
+#print "\$removed=$removed\n";
+#ok($removed);
+print "Successfully removed ".scalar(@$removed)." items\n";
+
 # for my $i (0..$#$results) {
 #   print $results->[$i].","; 
 # }
