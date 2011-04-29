@@ -128,6 +128,41 @@ PerlIntervalTree::remove(int low, int high, ...)
     RETVAL
 
 AV *
+PerlIntervalTree::remove_window(int low, int high, ...)
+  CODE:
+    RETVAL = newAV();
+    sv_2mortal((SV*)RETVAL);
+
+    if (items > 3) {
+      SV *callback = ST(3); 
+      RemoveFunctor remove_functor(callback);
+      std::vector<std::tr1::shared_ptr<SV> > removed;
+      THIS->remove_window(low, high-1, remove_functor, removed);
+
+      for (std::vector<std::tr1::shared_ptr<SV> >::const_iterator
+          i=removed.begin(); i!=removed.end(); ++i) 
+      {
+        SV *value = i->get();
+        SvREFCNT_inc(value);
+        av_push(RETVAL, value);
+      }
+    }
+    else {
+      std::vector<std::tr1::shared_ptr<SV> > removed; 
+      THIS->remove_window(low, high-1, removed);
+
+      for (std::vector<std::tr1::shared_ptr<SV> >::const_iterator
+          i=removed.begin(); i!=removed.end(); ++i) 
+      {
+        SV *value = i->get();
+        SvREFCNT_inc(value);
+        av_push(RETVAL, value);
+      }
+    }
+  OUTPUT:
+    RETVAL
+
+AV *
 PerlIntervalTree::fetch(int low, int high)
   PROTOTYPE: $;$
   CODE:
