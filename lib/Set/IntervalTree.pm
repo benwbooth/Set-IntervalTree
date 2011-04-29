@@ -80,6 +80,13 @@ Set::IntervalTree - Perform range-based lookups on sets of ranges.
   my $window = $tree->window(100,200);
   print scalar(@$results)." intervals found.\n";
 
+  # remove only items overlapping location 100..200 with values 
+  # less than 100;
+  my $removed = $tree->remove(100,200 sub {
+    my ($item, $low, $high) = @_;
+    return $item < 100;
+  });
+
 =head1 DESCRIPTION
 
 Set::IntervalTree uses Interval Trees to store and efficiently 
@@ -114,7 +121,7 @@ my $results = $tree->fetch($low, $high)
   $low is the lower bound of the region to query.
   $high is the upper bound of the region to query.
 
-my $results = $tree->window($low, $high)
+my $results = $tree->fetch_window($low, $high)
 
   Return an arrayref of perl objects whose ranges are completely contained
   witin the specified range.
@@ -122,10 +129,28 @@ my $results = $tree->window($low, $high)
   $low is the lower bound of the region to query.
   $high is the upper bound of the region to query.
 
-=head1 Limitations
+my $removed = $tree->remove($low, $high [, optional \&coderef]);
 
-I still haven't implemented a $tree->remove() method to remove ranges 
-from a tree.
+  Remove items in the tree that overlap the region from $low to $high. 
+  A coderef can be passed in as an optional third argument for filtering
+  what is removed. The coderef receives the stored item, the low point,
+  and the high point as its arguments. If the result value of the coderef
+  is true, the item is removed, otherwise the item remains in the tree.
+
+  Returns the list of removed items.
+
+my $removed = $tree->remove_window($low, $high [, optional \&coderef]);
+
+  Remove items in the tree that are contained within the region from $low
+  to $high.  A coderef can be passed in as an optional third argument
+  for filtering what is removed. The coderef receives the stored item,
+  the low point, and the high point as its arguments. If the result
+  value of the coderef is true, the item is removed, otherwise the item
+  remains in the tree.
+
+  Returns the list of removed items.
+
+=head1 Limitations
 
 A $tree->print() serialization method might be useful for debugging.
 
