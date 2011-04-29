@@ -779,7 +779,7 @@ void IntervalTree<T,N>::remove(N low, N high, const F &removeFunctor, std::vecto
   for (typename std::vector<IntervalTree<T,N>::Node*>::const_iterator 
       i=got.begin(); i!=got.end(); ++i)
   {
-    if (removeFunctor((*i)->value(), low, high)) {
+    if (removeFunctor((*i)->value(), (*i)->low(), (*i)->high())) {
       removed.push_back((*i)->value());
       remove(*i);
     }
@@ -811,7 +811,7 @@ void IntervalTree<T,N>::remove_window(
   for (typename std::vector<IntervalTree<T,N>::Node*>::const_iterator 
       i=got.begin(); i!=got.end(); ++i)
   {
-    if (removeFunctor((*i)->value(), low, high)) {
+    if (removeFunctor((*i)->value(), (*i)->low(), (*i)->high())) {
       removed.push_back((*i)->value());
       remove(*i);
     }

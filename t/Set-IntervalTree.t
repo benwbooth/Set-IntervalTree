@@ -5,7 +5,7 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 3;
+use Test::More tests => 4;
 BEGIN { use_ok('Set::IntervalTree') };
 
 #########################
@@ -43,20 +43,23 @@ my $results = $tree->fetch($low,$high);
 ok($results);
 print scalar(@$results)." intervals found.\n";
 
-print "Removing all values greater than 100\n";
-my $removed = $tree->remove(0, $domain, sub {
-    my ($i, $low, $high) = @_;
-    print "\$i=$i, \$low=$low, \$high=$high\n";
-    return $i > 100;
-  });
-#my $removed = $tree->remove($start, $domain);
-#print "\$removed=$removed\n";
-#ok($removed);
-print "Successfully removed ".scalar(@$removed)." items\n";
-
 # for my $i (0..$#$results) {
 #   print $results->[$i].","; 
 # }
+
+print "Removing all values greater than 500\n";
+my $r=0;
+my $removed = $tree->remove(0, $domain, sub {
+    my ($i, $low, $high) = @_;
+    if ($i > 500) {
+      print "\$i=$i, \$low=$low, \$high=$high\n";
+      $r++;
+    }
+    return $i > 500;
+  });
+ok($removed && @$removed == $r);
+print "Successfully removed ".scalar(@$removed)." items\n";
+
 print "\n";
 
 exit 0;
