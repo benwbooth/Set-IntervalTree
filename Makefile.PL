@@ -1,7 +1,7 @@
 use 5.006001;
 use ExtUtils::MakeMaker;
 
-$CC = 'g++';
+$CC = 'c++';
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
@@ -16,7 +16,7 @@ WriteMakefile(
     DEFINE            => '-Isrc', # e.g., '-DHAVE_SOMETHING'
     CC                => $CC,
     LD                => '$(CC)',
-    OPTIMIZE          => '-g -O0',
+    OPTIMIZE          => '-g -O0 -std=c++11'.($^O eq 'darwin'?' --stdlib=libc++':''),
     XSOPT             => '-C++',
     TYPEMAPS          => ['perlobject.map'],
     INC               => '-Isrc', # e.g., '-I. -I/usr/include/other'

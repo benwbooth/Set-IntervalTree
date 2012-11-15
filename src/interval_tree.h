@@ -18,7 +18,7 @@
 // The low should return the lowest point of the interval and
 // the high should return the highest point of the interval.  
 
-template<typename T, typename N=long long>
+template<typename T, typename N=long>
 class IntervalTree {
 public:
   enum color_t {BLACK, RED};

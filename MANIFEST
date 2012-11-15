@@ -9,4 +9,5 @@ src/interval_tree.h
 src/test_main.cc
 src/Makefile
 t/Set-IntervalTree.t
+t/check32bitwraparound.t
 lib/Set/IntervalTree.pm

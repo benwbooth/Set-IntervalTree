@@ -1,16 +1,13 @@
-#ifdef __cplusplus
 extern "C" {
-#endif
-
-#include "EXTERN.h"
-#include "perl.h"
-#include "XSUB.h"
-
-#ifdef __cplusplus
+  #include "EXTERN.h"
+  #include "perl.h"
+  #include "XSUB.h"
+  #undef seed
+  #undef do_open
+  #undef do_close
 }
-#endif
 
-#include <tr1/memory>
+#include <memory>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -18,7 +15,10 @@ extern "C" {
 
 #include <interval_tree.h>
 
-std::ostream& operator<<(std::ostream &out, const std::tr1::shared_ptr<SV> &value) {
+#define do_open   Perl_do_open
+#define do_close  Perl_do_close
+
+std::ostream& operator<<(std::ostream &out, const std::shared_ptr<SV> &value) {
   out << "Node:" << value.get();
   return out;
 }
@@ -34,7 +34,7 @@ class RemoveFunctor {
   SV *callback;
   public:
     RemoveFunctor(SV *callback_) : callback(callback_) {}
-    bool operator()(std::tr1::shared_ptr<SV> value, int low, int high) const {
+    bool operator()(std::shared_ptr<SV> value, long low, long high) const {
       // pass args into callback
       dSP;
       ENTER;
@@ -67,8 +67,8 @@ class RemoveFunctor {
     }
 };
 
-typedef IntervalTree<std::tr1::shared_ptr<SV> > PerlIntervalTree;
-typedef IntervalTree<std::tr1::shared_ptr<SV> >::Node PerlIntervalTree_Node;
+typedef IntervalTree<std::shared_ptr<SV>,long> PerlIntervalTree;
+typedef IntervalTree<std::shared_ptr<SV>,long>::Node PerlIntervalTree_Node;
 
 MODULE = Set::IntervalTree PACKAGE = Set::IntervalTree
 
@@ -85,15 +85,15 @@ PerlIntervalTree::str()
     RETVAL
 
 void
-PerlIntervalTree::insert(SV *value, int low, int high)
+PerlIntervalTree::insert(SV *value, long low, long high)
   PROTOTYPE: $;$;$
   CODE: 
     SvREFCNT_inc(value);
-    std::tr1::shared_ptr<SV> ptr(value, SV_deleter());
+    std::shared_ptr<SV> ptr(value, SV_deleter());
     THIS->insert(ptr, low, high-1);
 
 AV *
-PerlIntervalTree::remove(int low, int high, ...)
+PerlIntervalTree::remove(long low, long high, ...)
   CODE:
     RETVAL = newAV();
     sv_2mortal((SV*)RETVAL);
@@ -101,10 +101,10 @@ PerlIntervalTree::remove(int low, int high, ...)
     if (items > 3) {
       SV *callback = ST(3); 
       RemoveFunctor remove_functor(callback);
-      std::vector<std::tr1::shared_ptr<SV> > removed;
+      std::vector<std::shared_ptr<SV> > removed;
       THIS->remove(low, high-1, remove_functor, removed);
 
-      for (std::vector<std::tr1::shared_ptr<SV> >::const_iterator
+      for (std::vector<std::shared_ptr<SV> >::const_iterator
           i=removed.begin(); i!=removed.end(); ++i) 
       {
         SV *value = i->get();
@@ -113,10 +113,10 @@ PerlIntervalTree::remove(int low, int high, ...)
       }
     }
     else {
-      std::vector<std::tr1::shared_ptr<SV> > removed; 
+      std::vector<std::shared_ptr<SV> > removed; 
       THIS->remove(low, high-1, removed);
 
-      for (std::vector<std::tr1::shared_ptr<SV> >::const_iterator
+      for (std::vector<std::shared_ptr<SV> >::const_iterator
           i=removed.begin(); i!=removed.end(); ++i) 
       {
         SV *value = i->get();
@@ -128,7 +128,7 @@ PerlIntervalTree::remove(int low, int high, ...)
     RETVAL
 
 AV *
-PerlIntervalTree::remove_window(int low, int high, ...)
+PerlIntervalTree::remove_window(long low, long high, ...)
   CODE:
     RETVAL = newAV();
     sv_2mortal((SV*)RETVAL);
@@ -136,10 +136,10 @@ PerlIntervalTree::remove_window(int low, int high, ...)
     if (items > 3) {
       SV *callback = ST(3); 
       RemoveFunctor remove_functor(callback);
-      std::vector<std::tr1::shared_ptr<SV> > removed;
+      std::vector<std::shared_ptr<SV> > removed;
       THIS->remove_window(low, high-1, remove_functor, removed);
 
-      for (std::vector<std::tr1::shared_ptr<SV> >::const_iterator
+      for (std::vector<std::shared_ptr<SV> >::const_iterator
           i=removed.begin(); i!=removed.end(); ++i) 
       {
         SV *value = i->get();
@@ -148,10 +148,10 @@ PerlIntervalTree::remove_window(int low, int high, ...)
       }
     }
     else {
-      std::vector<std::tr1::shared_ptr<SV> > removed; 
+      std::vector<std::shared_ptr<SV> > removed; 
       THIS->remove_window(low, high-1, removed);
 
-      for (std::vector<std::tr1::shared_ptr<SV> >::const_iterator
+      for (std::vector<std::shared_ptr<SV> >::const_iterator
           i=removed.begin(); i!=removed.end(); ++i) 
       {
         SV *value = i->get();
@@ -163,12 +163,12 @@ PerlIntervalTree::remove_window(int low, int high, ...)
     RETVAL
 
 AV *
-PerlIntervalTree::fetch(int low, int high)
+PerlIntervalTree::fetch(long low, long high)
   PROTOTYPE: $;$
   CODE:
     RETVAL = newAV();
     sv_2mortal((SV*)RETVAL);
-    std::vector<std::tr1::shared_ptr<SV> > intervals;
+    std::vector<std::shared_ptr<SV> > intervals;
     THIS->fetch(low, high-1, intervals);
     for (size_t i=0; i<intervals.size(); i++) {
       SV *value = intervals[i].get();
@@ -179,12 +179,12 @@ PerlIntervalTree::fetch(int low, int high)
     RETVAL
 
 AV *
-PerlIntervalTree::fetch_window(int low, int high)
+PerlIntervalTree::fetch_window(long low, long high)
   PROTOTYPE: $;$
   CODE:
     RETVAL = newAV();
     sv_2mortal((SV*)RETVAL);
-    std::vector<std::tr1::shared_ptr<SV> > intervals;
+    std::vector<std::shared_ptr<SV> > intervals;
     THIS->fetch_window(low, high-1, intervals);
     for (size_t i=0; i<intervals.size(); i++) {
       SV *value = intervals[i].get();

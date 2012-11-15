@@ -27,7 +27,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -92,6 +92,8 @@ Set::IntervalTree - Perform range-based lookups on sets of ranges.
 Set::IntervalTree uses Interval Trees to store and efficiently 
 look up ranges using a range-based lookup.
 
+All intervals are half-open, i.e. [1,3), [2,6), etc.
+
 =head1 EXPORTS
 
 Nothing.
@@ -150,7 +152,11 @@ my $removed = $tree->remove_window($low, $high [, optional \&coderef]);
 
   Returns the list of removed items.
 
-=head1 Limitations
+=head1 CAVEATS
+
+You will need a C++11 capable compiler to compile this module.
+
+=head1 LIMITATIONS
 
 A $tree->print() serialization method might be useful for debugging.
 
