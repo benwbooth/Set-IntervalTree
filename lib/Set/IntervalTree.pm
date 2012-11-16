@@ -27,7 +27,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -151,10 +151,6 @@ my $removed = $tree->remove_window($low, $high [, optional \&coderef]);
   remains in the tree.
 
   Returns the list of removed items.
-
-=head1 CAVEATS
-
-You will need a C++11 capable compiler to compile this module.
 
 =head1 LIMITATIONS
 

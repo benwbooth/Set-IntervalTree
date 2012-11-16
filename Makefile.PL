@@ -16,7 +16,7 @@ WriteMakefile(
     DEFINE            => '-Isrc', # e.g., '-DHAVE_SOMETHING'
     CC                => $CC,
     LD                => '$(CC)',
-    OPTIMIZE          => '-g -O0 -std=c++11'.($^O eq 'darwin'?' --stdlib=libc++':''),
+    OPTIMIZE          => '-g -O2',
     XSOPT             => '-C++',
     TYPEMAPS          => ['perlobject.map'],
     INC               => '-Isrc', # e.g., '-I. -I/usr/include/other'
