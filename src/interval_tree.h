@@ -100,7 +100,7 @@ protected:
       const N currentHigh,
       bool match) const;
 private:
-  std::vector<IntervalTree<T,N>::it_recursion_node> recursionNodeStack;
+  std::vector<it_recursion_node> recursionNodeStack;
   size_t currentParent;
 };
 
@@ -142,7 +142,7 @@ IntervalTree<T,N>::IntervalTree()
   root->color=BLACK;
 
   /* the following are used for the fetch function */
-  recursionNodeStack.push_back(IntervalTree<T,N>::it_recursion_node());
+  recursionNodeStack.push_back(it_recursion_node());
 }
 
 template<typename T, typename N>
@@ -899,7 +899,7 @@ void IntervalTree<T,N>::fetch(N low, N high, std::vector<T> &enumResultStack)  {
       recursionNodeStack[currentParent].tryRightBranch=true;
     }
     if(x->left->maxHigh >= low) { // implies x != nil 
-      recursionNodeStack.push_back(IntervalTree<T,N>::it_recursion_node());
+      recursionNodeStack.push_back(it_recursion_node());
       recursionNodeStack.back().start_node = x;
       recursionNodeStack.back().tryRightBranch = false;
       recursionNodeStack.back().parentIndex = currentParent;
@@ -910,7 +910,7 @@ void IntervalTree<T,N>::fetch(N low, N high, std::vector<T> &enumResultStack)  {
     }
     stuffToDo = (x != nil);
     while( (!stuffToDo) && (recursionNodeStack.size() > 1) ) {
-        IntervalTree<T,N>::it_recursion_node back = recursionNodeStack.back();
+        it_recursion_node back = recursionNodeStack.back();
         recursionNodeStack.pop_back();
 
         if(back.tryRightBranch) {
@@ -950,7 +950,7 @@ void IntervalTree<T,N>::fetch_node(
       recursionNodeStack[currentParent].tryRightBranch=true;
     }
     if(x->left->maxHigh >= low) { // implies x != nil 
-      recursionNodeStack.push_back(IntervalTree<T,N>::it_recursion_node());
+      recursionNodeStack.push_back(it_recursion_node());
       recursionNodeStack.back().start_node = x;
       recursionNodeStack.back().tryRightBranch = false;
       recursionNodeStack.back().parentIndex = currentParent;
@@ -961,7 +961,7 @@ void IntervalTree<T,N>::fetch_node(
     }
     stuffToDo = (x != nil);
     while( (!stuffToDo) && (recursionNodeStack.size() > 1) ) {
-        IntervalTree<T,N>::it_recursion_node back = recursionNodeStack.back();
+        it_recursion_node back = recursionNodeStack.back();
         recursionNodeStack.pop_back();
 
         if(back.tryRightBranch) {
@@ -998,7 +998,7 @@ void IntervalTree<T,N>::fetch_window(N low, N high, std::vector<T> &enumResultSt
       recursionNodeStack[currentParent].tryRightBranch=true;
     }
     if(x->left->maxHigh >= low) { // implies x != nil 
-      recursionNodeStack.push_back(IntervalTree<T,N>::it_recursion_node());
+      recursionNodeStack.push_back(it_recursion_node());
       recursionNodeStack.back().start_node = x;
       recursionNodeStack.back().tryRightBranch = false;
       recursionNodeStack.back().parentIndex = currentParent;
@@ -1009,7 +1009,7 @@ void IntervalTree<T,N>::fetch_window(N low, N high, std::vector<T> &enumResultSt
     }
     stuffToDo = (x != nil);
     while( (!stuffToDo) && (recursionNodeStack.size() > 1) ) {
-        IntervalTree<T,N>::it_recursion_node back = recursionNodeStack.back();
+        it_recursion_node back = recursionNodeStack.back();
         recursionNodeStack.pop_back();
 
         if(back.tryRightBranch) {
@@ -1049,7 +1049,7 @@ void IntervalTree<T,N>::fetch_window_node(
       recursionNodeStack[currentParent].tryRightBranch=true;
     }
     if(x->left->maxHigh >= low) { // implies x != nil 
-      recursionNodeStack.push_back(IntervalTree<T,N>::it_recursion_node());
+      recursionNodeStack.push_back(it_recursion_node());
       recursionNodeStack.back().start_node = x;
       recursionNodeStack.back().tryRightBranch = false;
       recursionNodeStack.back().parentIndex = currentParent;
@@ -1060,7 +1060,7 @@ void IntervalTree<T,N>::fetch_window_node(
     }
     stuffToDo = (x != nil);
     while( (!stuffToDo) && (recursionNodeStack.size() > 1) ) {
-        IntervalTree<T,N>::it_recursion_node back = recursionNodeStack.back();
+        it_recursion_node back = recursionNodeStack.back();
         recursionNodeStack.pop_back();
 
         if(back.tryRightBranch) {
