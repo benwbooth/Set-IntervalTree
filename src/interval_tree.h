@@ -131,12 +131,12 @@ IntervalTree<T,N>::Node::~Node()
 template<typename T, typename N>
 IntervalTree<T,N>::IntervalTree()
 {
-  nil = new IntervalTree<T,N>::Node();
+  nil = new typename IntervalTree<T,N>::Node();
   nil->left = nil->right = nil->parent = nil;
   nil->color = BLACK;
   nil->key = nil->high_ = nil->maxHigh = std::numeric_limits<N>::min();
   
-  root = new IntervalTree<T,N>::Node();
+  root = new typename IntervalTree<T,N>::Node();
   root->parent = root->left = root->right = nil;
   root->key = root->high_ = root->maxHigh = std::numeric_limits<N>::max();
   root->color=BLACK;
@@ -179,7 +179,7 @@ T IntervalTree<T,N>::Node::value() const {
 
 template<typename T, typename N>
 void IntervalTree<T,N>::LeftRotate(IntervalTree<T,N>::Node* x) {
-  IntervalTree<T,N>::Node* y;
+  typename IntervalTree<T,N>::Node* y;
  
   /*  I originally wrote this function to use the sentinel for */
   /*  nil to avoid checking for nil.  However this introduces a */
@@ -241,7 +241,7 @@ void IntervalTree<T,N>::LeftRotate(IntervalTree<T,N>::Node* x) {
 
 template<typename T, typename N>
 void IntervalTree<T,N>::RightRotate(IntervalTree<T,N>::Node* y) {
-  IntervalTree<T,N>::Node* x;
+  typename IntervalTree<T,N>::Node* x;
 
   /*  I originally wrote this function to use the sentinel for */
   /*  nil to avoid checking for nil.  However this introduces a */
@@ -299,8 +299,8 @@ void IntervalTree<T,N>::RightRotate(IntervalTree<T,N>::Node* y) {
 template<typename T, typename N>
 void IntervalTree<T,N>::TreeInsertHelp(IntervalTree<T,N>::Node* z) {
   /*  This function should only be called by InsertITTree (see above) */
-  IntervalTree<T,N>::Node* x;
-  IntervalTree<T,N>::Node* y;
+  typename IntervalTree<T,N>::Node* x;
+  typename IntervalTree<T,N>::Node* y;
     
   z->left=z->right=nil;
   y=root;
@@ -376,11 +376,11 @@ void IntervalTree<T,N>::FixUpMaxHigh(IntervalTree<T,N>::Node * x) {
 template <typename T, typename N>
 typename IntervalTree<T,N>::Node* IntervalTree<T,N>::insert(const T& newInterval, N low, N high)
 {
-  IntervalTree<T,N>::Node * y;
-  IntervalTree<T,N>::Node * x;
-  IntervalTree<T,N>::Node * newNode;
+  typename IntervalTree<T,N>::Node * y;
+  typename IntervalTree<T,N>::Node * x;
+  typename IntervalTree<T,N>::Node * newNode;
 
-  x = new IntervalTree<T,N>::Node(newInterval, low, high);
+  x = new typename IntervalTree<T,N>::Node(newInterval, low, high);
   TreeInsertHelp(x);
   FixUpMaxHigh(x->parent);
   newNode = x;
@@ -451,7 +451,7 @@ typename IntervalTree<T,N>::Node* IntervalTree<T,N>::insert(const T& newInterval
 template<typename T, typename N> 
 typename IntervalTree<T,N>::Node * IntervalTree<T,N>::GetSuccessorOf(IntervalTree<T,N>::Node * x) const
 { 
-  IntervalTree<T,N>::Node* y;
+  typename IntervalTree<T,N>::Node* y;
 
   if (nil != (y = x->right)) { /* assignment to y is intentional */
     while(y->left != nil) { /* returns the minium of the right subtree of x */
@@ -484,7 +484,7 @@ typename IntervalTree<T,N>::Node * IntervalTree<T,N>::GetSuccessorOf(IntervalTre
 
 template<typename T, typename N>
 typename IntervalTree<T,N>::Node * IntervalTree<T,N>::GetPredecessorOf(IntervalTree<T,N>::Node * x) const {
-  IntervalTree<T,N>::Node* y;
+  typename IntervalTree<T,N>::Node* y;
 
   if (nil != (y = x->left)) { /* assignment to y is intentional */
     while(y->right != nil) { /* returns the maximum of the left subtree of x */
@@ -546,8 +546,8 @@ void IntervalTree<T,N>::TreePrintHelper(IntervalTree<T,N>::Node* x, std::strings
 template<typename T, typename N>
 IntervalTree<T,N>::~IntervalTree() {
 
-  IntervalTree<T,N>::Node * x = root->left;
-  std::vector<IntervalTree<T,N>::Node *> stuffToFree;
+  typename IntervalTree<T,N>::Node * x = root->left;
+  typename std::vector<typename IntervalTree<T,N>::Node *> stuffToFree;
 
   if (x != nil) {
     if (x->left != nil) {
@@ -613,8 +613,8 @@ std::string IntervalTree<T,N>::str() const {
 
 template<typename T,typename N>
 void IntervalTree<T,N>::DeleteFixUp(IntervalTree<T,N>::Node* x) {
-  IntervalTree<T,N>::Node * w;
-  IntervalTree<T,N>::Node * rootLeft = root->left;
+  typename IntervalTree<T,N>::Node * w;
+  typename IntervalTree<T,N>::Node * rootLeft = root->left;
 
   while( (x->color == BLACK) && (rootLeft != x)) {
     if (x == x->parent->left) {
@@ -697,8 +697,8 @@ void IntervalTree<T,N>::DeleteFixUp(IntervalTree<T,N>::Node* x) {
 
 template<typename T, typename N>
 T IntervalTree<T,N>::remove(IntervalTree<T,N>::Node * z){
-  IntervalTree<T,N>::Node* y;
-  IntervalTree<T,N>::Node* x;
+  typename IntervalTree<T,N>::Node* y;
+  typename IntervalTree<T,N>::Node* x;
   T returnValue = z->value();
 
   y= ((z->left == nil) || (z->right == nil)) ? z : GetSuccessorOf(z);
@@ -761,9 +761,9 @@ T IntervalTree<T,N>::remove(IntervalTree<T,N>::Node * z){
 template <typename T, typename N>
 void IntervalTree<T,N>::remove(N low, N high, std::vector<T> &removed) 
 {
-  std::vector<IntervalTree<T,N>::Node*> got;
+  typename std::vector<typename IntervalTree<T,N>::Node*> got;
   fetch_node(low, high, got);
-  for (typename std::vector<IntervalTree<T,N>::Node*>::const_iterator 
+  for (typename std::vector<typename IntervalTree<T,N>::Node*>::const_iterator 
       i=got.begin(); i!=got.end(); ++i)
   {
     removed.push_back((*i)->value());
@@ -774,9 +774,9 @@ void IntervalTree<T,N>::remove(N low, N high, std::vector<T> &removed)
 template <typename T, typename N> template <typename F> 
 void IntervalTree<T,N>::remove(N low, N high, const F &removeFunctor, std::vector<T> &removed) 
 {
-  std::vector<IntervalTree<T,N>::Node*> got;
+  typename std::vector<typename IntervalTree<T,N>::Node*> got;
   fetch_node(low, high, got);
-  for (typename std::vector<IntervalTree<T,N>::Node*>::const_iterator 
+  for (typename std::vector<typename IntervalTree<T,N>::Node*>::const_iterator 
       i=got.begin(); i!=got.end(); ++i)
   {
     if (removeFunctor((*i)->value(), (*i)->low(), (*i)->high())) {
@@ -789,9 +789,9 @@ void IntervalTree<T,N>::remove(N low, N high, const F &removeFunctor, std::vecto
 template <typename T, typename N>
 void IntervalTree<T,N>::remove_window(N low, N high, std::vector<T> &removed) 
 {
-  std::vector<IntervalTree<T,N>::Node*> got;
+  typename std::vector<typename IntervalTree<T,N>::Node*> got;
   fetch_window_node(low, high, got);
-  for (typename std::vector<IntervalTree<T,N>::Node*>::const_iterator 
+  for (typename std::vector<typename IntervalTree<T,N>::Node*>::const_iterator 
       i=got.begin(); i!=got.end(); ++i)
   {
     removed.push_back((*i)->value());
@@ -806,9 +806,9 @@ void IntervalTree<T,N>::remove_window(
     const F& removeFunctor, 
     std::vector<T> &removed) 
 {
-  std::vector<IntervalTree<T,N>::Node*> got;
+  typename std::vector<typename IntervalTree<T,N>::Node*> got;
   fetch_window_node(low, high, got);
-  for (typename std::vector<IntervalTree<T,N>::Node*>::const_iterator 
+  for (typename std::vector<typename IntervalTree<T,N>::Node*>::const_iterator 
       i=got.begin(); i!=got.end(); ++i)
   {
     if (removeFunctor((*i)->value(), (*i)->low(), (*i)->high())) {
@@ -882,7 +882,7 @@ N IntervalTree<T,N>::Contain(N a1, N a2, N b1, N b2) {
 
 template<typename T, typename N>
 void IntervalTree<T,N>::fetch(N low, N high, std::vector<T> &enumResultStack)  {
-  IntervalTree<T,N>::Node* x=root->left;
+  typename IntervalTree<T,N>::Node* x=root->left;
   bool stuffToDo = (x != nil);
   
   // Possible speed up: add min field to prune right searches //
@@ -933,7 +933,7 @@ void IntervalTree<T,N>::fetch_node(
     N high, 
     std::vector<typename IntervalTree<T,N>::Node*> &enumResultStack)  
 {
-  IntervalTree<T,N>::Node* x=root->left;
+  typename IntervalTree<T,N>::Node* x=root->left;
   bool stuffToDo = (x != nil);
   
   // Possible speed up: add min field to prune right searches //
@@ -981,7 +981,7 @@ void IntervalTree<T,N>::fetch_node(
 template<typename T, typename N>
 void IntervalTree<T,N>::fetch_window(N low, N high, std::vector<T> &enumResultStack)  
 {
-  IntervalTree<T,N>::Node* x=root->left;
+  typename IntervalTree<T,N>::Node* x=root->left;
   bool stuffToDo = (x != nil);
   
   // Possible speed up: add min field to prune right searches //
@@ -1032,7 +1032,7 @@ void IntervalTree<T,N>::fetch_window_node(
      N high, 
      std::vector<typename IntervalTree<T,N>::Node*> &enumResultStack)  
 {
-  IntervalTree<T,N>::Node* x=root->left;
+  typename IntervalTree<T,N>::Node* x=root->left;
   bool stuffToDo = (x != nil);
   
   // Possible speed up: add min field to prune right searches //
