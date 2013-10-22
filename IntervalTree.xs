@@ -107,12 +107,14 @@ void
 PerlIntervalTree::insert(SV *value, long low, long high)
   PROTOTYPE: $;$;$
   CODE: 
+    if (high <= low) Perl_croak(aTHX_ "Intervals must have positive width");
     SV_ptr ptr(value);
     THIS->insert(ptr, low, high-1);
 
 AV *
 PerlIntervalTree::remove(long low, long high, ...)
   CODE:
+    if (high <= low) Perl_croak(aTHX_ "Intervals must have positive width");
     RETVAL = newAV();
     sv_2mortal((SV*)RETVAL);
 
@@ -148,6 +150,7 @@ PerlIntervalTree::remove(long low, long high, ...)
 AV *
 PerlIntervalTree::remove_window(long low, long high, ...)
   CODE:
+    if (high <= low) Perl_croak(aTHX_ "Intervals must have positive width");
     RETVAL = newAV();
     sv_2mortal((SV*)RETVAL);
 
@@ -184,6 +187,7 @@ AV *
 PerlIntervalTree::fetch(long low, long high)
   PROTOTYPE: $;$
   CODE:
+    if (high <= low) Perl_croak(aTHX_ "Intervals must have positive width");
     RETVAL = newAV();
     sv_2mortal((SV*)RETVAL);
     std::vector<SV_ptr> intervals;
@@ -200,6 +204,7 @@ AV *
 PerlIntervalTree::fetch_window(long low, long high)
   PROTOTYPE: $;$
   CODE:
+    if (high <= low) Perl_croak(aTHX_ "Intervals must have positive width");
     RETVAL = newAV();
     sv_2mortal((SV*)RETVAL);
     std::vector<SV_ptr> intervals;

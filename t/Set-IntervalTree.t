@@ -28,7 +28,7 @@ srand(time);
 my $i;
 for $i (0..$count-1) {
   my $low = int(rand() * $domain);
-  my $high = int((rand() * ($domain-$low))+$low);
+  my $high = int((rand() * ($domain-$low))+$low)+1;
   $tree->insert($i,$low,$high);
 #  print "Added: [$low,$high]\n";
   print "*" if !($i%25000);
@@ -36,8 +36,8 @@ for $i (0..$count-1) {
 print "\n";
 # print "Tree: ".$tree->str;
 
-my $low = $domain * 0.4;
-my $high = $domain * 0.5;
+my $low = int($domain * 0.4);
+my $high = int($domain * 0.5);
 print "Enumerating intervals between $low and $high\n";
 my $results = $tree->fetch($low,$high);
 ok($results);
