@@ -27,7 +27,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -77,7 +77,7 @@ Set::IntervalTree - Perform range-based lookups on sets of ranges.
   $tree->insert($some_obj,1000,1100);
 
   my $results = $tree->fetch(400,800);
-  my $window = $tree->window(100,200);
+  my $window = $tree->fetch_window(100,200);
   print scalar(@$results)." intervals found.\n";
 
   # remove only items overlapping location 100..200 with values 
