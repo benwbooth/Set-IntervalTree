@@ -36,6 +36,12 @@ class SV_ptr {
       if (sv) SvREFCNT_inc(sv);
       return *this;
     }
+    bool operator!=(SV_ptr &ptr) {
+      return sv != ptr.get();
+    }
+    bool defined() {
+      return sv != 0;
+    }
     SV * get() {
       return sv; 
     }
@@ -100,6 +106,30 @@ PerlIntervalTree::str()
     std::string str = THIS->str();
     const char *tree = str.c_str();
     RETVAL = newSVpv(tree, 0);
+  OUTPUT:
+    RETVAL
+
+SV *
+PerlIntervalTree::fetch_nearest_up(long value)
+  CODE:
+    SV_ptr ptr = THIS->fetch_nearest_up(value);
+    SV *ret = ptr.get();
+    SvREFCNT_inc(ret);
+    RETVAL = ret;
+    if (RETVAL == 0)
+          XSRETURN_UNDEF;
+  OUTPUT:
+    RETVAL
+
+SV *
+PerlIntervalTree::fetch_nearest_down(long value)
+  CODE:
+    SV_ptr ptr = THIS->fetch_nearest_down(value-1);
+    SV *ret = ptr.get();
+    SvREFCNT_inc(ret);
+    RETVAL = ret;
+    if (RETVAL == 0)
+          XSRETURN_UNDEF;
   OUTPUT:
     RETVAL
 

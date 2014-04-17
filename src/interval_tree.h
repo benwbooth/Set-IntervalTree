@@ -70,6 +70,10 @@ public:
   Node * insert(const T&, N, N);
   void fetch(N, N, std::vector<T>&);
   void fetch_window(N, N, std::vector<T>&);
+  T fetch_nearest_up(IntervalTree<T,N>::Node* x, N value);
+  T fetch_nearest_up(N value);
+  IntervalTree<T,N>::Node* fetch_nearest_down(IntervalTree<T,N>::Node* x, N value);
+  T fetch_nearest_down(N value);
 protected:
   void fetch_node(N, N, std::vector<Node*>&);
   void fetch_window_node(N, N, std::vector<Node*>&);
@@ -926,6 +930,80 @@ void IntervalTree<T,N>::fetch(N low, N high, std::vector<T> &enumResultStack)  {
          || !"recursionStack not empty when exiting IntervalTree::fetch");
 #endif
 }
+
+template<typename T, typename N>
+T IntervalTree<T,N>::fetch_nearest_up(IntervalTree<T,N>::Node* x, N value)  {
+
+  if(x == nil)
+    return T();
+
+  if(x->key > value) {
+    // Maybe there is a better interval candidate in the left subtree
+    if(x->left != nil) {
+      T best_left_value = fetch_nearest_up(x->left,value);
+      if (best_left_value.defined()) 
+        return best_left_value;
+    }
+    return x->value();
+  } else {
+    return fetch_nearest_up(x->right,value);
+  }
+}
+
+template<typename T, typename N>
+T IntervalTree<T,N>::fetch_nearest_up(N value)  {
+  return fetch_nearest_up(root->left,value);
+}
+
+template<typename T, typename N>
+typename IntervalTree<T,N>::Node* IntervalTree<T,N>::fetch_nearest_down(IntervalTree<T,N>::Node* x, N value)  {
+
+  if (x == nil)
+    return NULL;
+
+  if(x->key > value) {
+    return fetch_nearest_down(x->left,value);
+  } else {
+    // There is not a better interval in the subtrees
+    if(x->high_ == x->maxHigh && x->high_ <= value) {
+      return x;
+    } else {
+      typename IntervalTree<T,N>::Node* best_node = NULL;
+      if(x->high_ <= value) {
+        best_node = x;
+      }
+      // Is there a closer interval in the left subtree
+      if(x->left != nil) {
+        typename IntervalTree<T,N>::Node* best_node_left = fetch_nearest_down(x->left,value);
+        if(best_node == NULL) {
+          best_node = best_node_left;
+        } else if(best_node_left != NULL && best_node_left->high_ > best_node->high_) {
+           best_node = best_node_left;
+        }
+      }
+      // Is there a closer interval in the right subtree
+      if(x->right != nil) {
+        typename IntervalTree<T,N>::Node* best_node_right = fetch_nearest_down(x->right,value);
+        if(best_node == NULL) {
+          best_node = best_node_right;
+        } else if(best_node_right != NULL && best_node_right->high_ > best_node->high_) {
+          best_node = best_node_right;
+        }
+      }
+      return best_node;
+    }
+  }
+}
+
+template<typename T, typename N>
+T IntervalTree<T,N>::fetch_nearest_down(N value)  {
+  typename IntervalTree<T,N>::Node* best_node = fetch_nearest_down(root->left,value);
+  if(best_node)
+    return best_node->value();
+  else
+    return T();
+}
+
 
 template<typename T, typename N>
 void IntervalTree<T,N>::fetch_node(

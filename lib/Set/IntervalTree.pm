@@ -131,6 +131,20 @@ my $results = $tree->fetch_window($low, $high)
   $low is the lower bound of the region to query.
   $high is the upper bound of the region to query.
 
+my $nearest_up = $tree->fetch_nearest_up($query)
+
+  Search for the closest interval in upstream that does not contain the query
+  and returns the perl object associated with it.
+
+  $query is the position to use for the search
+
+my $nearest_down = $tree->fetch_nearest_down($query)
+
+  Search for the closest interval in downstream that does not contain the query
+  and returns the perl object associated with it.
+
+  $query is the position to use for the search
+
 my $removed = $tree->remove($low, $high [, optional \&coderef]);
 
   Remove items in the tree that overlap the region from $low to $high. 
