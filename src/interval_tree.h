@@ -72,7 +72,7 @@ public:
   void fetch_window(N, N, std::vector<T>&);
   T fetch_nearest_up(IntervalTree<T,N>::Node* x, N value);
   T fetch_nearest_up(N value);
-  IntervalTree<T,N>::Node* fetch_nearest_down(IntervalTree<T,N>::Node* x, N value);
+  typename IntervalTree<T,N>::Node* fetch_nearest_down(IntervalTree<T,N>::Node* x, N value);
   T fetch_nearest_down(N value);
 protected:
   void fetch_node(N, N, std::vector<Node*>&);
