@@ -12,7 +12,7 @@ extern "C" {
 #include <iostream>
 #include <sstream>
 
-#include <interval_tree.h>
+#include "interval_tree.h"
 
 #define do_open   Perl_do_open
 #define do_close  Perl_do_close
