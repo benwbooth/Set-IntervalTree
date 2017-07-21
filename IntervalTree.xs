@@ -1,3 +1,8 @@
+#include <string>
+#include <vector>
+#include <iostream>
+#include <sstream>
+
 extern "C" {
   #include "EXTERN.h"
   #include "perl.h"
@@ -6,11 +11,6 @@ extern "C" {
   #undef do_open
   #undef do_close
 }
-
-#include <string>
-#include <vector>
-#include <iostream>
-#include <sstream>
 
 #include "interval_tree.h"
 
