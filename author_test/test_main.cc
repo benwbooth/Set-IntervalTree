@@ -34,7 +34,8 @@ int main(int argc, char *argv[])
   high = domain * 0.5f;//10% of the domain is being tested
   std::cout << "Enumerating intervals between " << low 
       << " and " << high << std::endl;
-  std::vector<int> results = intervalTree.fetch(low,high);
+  std::vector<int> results;
+  intervalTree.fetch(low, high, results);
   std::cout << results.size() << " intervals found." << std::endl;
 
   for(int i=0; i<results.size(); i++) {
