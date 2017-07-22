@@ -70,9 +70,9 @@ public:
   Node * insert(const T&, N, N);
   void fetch(N, N, std::vector<T>&);
   void fetch_window(N, N, std::vector<T>&);
-  T fetch_nearest_up(IntervalTree<T,N>::Node* x, N value);
+  T fetch_nearest_up(typename IntervalTree<T,N>::Node* x, N value);
   T fetch_nearest_up(N value);
-  IntervalTree<T,N>::Node* fetch_nearest_down(IntervalTree<T,N>::Node* x, N value);
+  typename IntervalTree<T,N>::Node* fetch_nearest_down(typename IntervalTree<T,N>::Node* x, N value);
   T fetch_nearest_down(N value);
 protected:
   void fetch_node(N, N, std::vector<Node*>&);
@@ -182,7 +182,7 @@ T IntervalTree<T,N>::Node::value() const {
 /***********************************************************************/
 
 template<typename T, typename N>
-void IntervalTree<T,N>::LeftRotate(IntervalTree<T,N>::Node* x) {
+void IntervalTree<T,N>::LeftRotate(typename IntervalTree<T,N>::Node* x) {
   typename IntervalTree<T,N>::Node* y;
  
   /*  I originally wrote this function to use the sentinel for */
@@ -244,7 +244,7 @@ void IntervalTree<T,N>::LeftRotate(IntervalTree<T,N>::Node* x) {
 
 
 template<typename T, typename N>
-void IntervalTree<T,N>::RightRotate(IntervalTree<T,N>::Node* y) {
+void IntervalTree<T,N>::RightRotate(typename IntervalTree<T,N>::Node* y) {
   typename IntervalTree<T,N>::Node* x;
 
   /*  I originally wrote this function to use the sentinel for */
@@ -301,7 +301,7 @@ void IntervalTree<T,N>::RightRotate(IntervalTree<T,N>::Node* y) {
 /***********************************************************************/
 
 template<typename T, typename N>
-void IntervalTree<T,N>::TreeInsertHelp(IntervalTree<T,N>::Node* z) {
+void IntervalTree<T,N>::TreeInsertHelp(typename IntervalTree<T,N>::Node* z) {
   /*  This function should only be called by InsertITTree (see above) */
   typename IntervalTree<T,N>::Node* x;
   typename IntervalTree<T,N>::Node* y;
@@ -348,7 +348,7 @@ void IntervalTree<T,N>::TreeInsertHelp(IntervalTree<T,N>::Node* z) {
 /***********************************************************************/
 
 template<typename T, typename N>
-void IntervalTree<T,N>::FixUpMaxHigh(IntervalTree<T,N>::Node * x) {
+void IntervalTree<T,N>::FixUpMaxHigh(typename IntervalTree<T,N>::Node * x) {
   while(x != root) {
     x->maxHigh=std::max(x->high_,std::max(x->left->maxHigh,x->right->maxHigh));
     x=x->parent;
@@ -453,7 +453,7 @@ typename IntervalTree<T,N>::Node* IntervalTree<T,N>::insert(const T& newInterval
 /***********************************************************************/
   
 template<typename T, typename N> 
-typename IntervalTree<T,N>::Node * IntervalTree<T,N>::GetSuccessorOf(IntervalTree<T,N>::Node * x) const
+typename IntervalTree<T,N>::Node * IntervalTree<T,N>::GetSuccessorOf(typename IntervalTree<T,N>::Node * x) const
 { 
   typename IntervalTree<T,N>::Node* y;
 
@@ -487,7 +487,7 @@ typename IntervalTree<T,N>::Node * IntervalTree<T,N>::GetSuccessorOf(IntervalTre
 /***********************************************************************/
 
 template<typename T, typename N>
-typename IntervalTree<T,N>::Node * IntervalTree<T,N>::GetPredecessorOf(IntervalTree<T,N>::Node * x) const {
+typename IntervalTree<T,N>::Node * IntervalTree<T,N>::GetPredecessorOf(typename IntervalTree<T,N>::Node * x) const {
   typename IntervalTree<T,N>::Node* y;
 
   if (nil != (y = x->left)) { /* assignment to y is intentional */
@@ -522,8 +522,8 @@ typename IntervalTree<T,N>::Node * IntervalTree<T,N>::GetPredecessorOf(IntervalT
 /***********************************************************************/
 
 template<typename T, typename N>
-std::string IntervalTree<T,N>::Node::str(IntervalTree<T,N>::Node * nil,
-                             IntervalTree<T,N>::Node * root) const {
+std::string IntervalTree<T,N>::Node::str(typename IntervalTree<T,N>::Node * nil,
+                             typename IntervalTree<T,N>::Node * root) const {
   std::stringstream s;
 
   s << value_;
@@ -539,7 +539,7 @@ std::string IntervalTree<T,N>::Node::str(IntervalTree<T,N>::Node * nil,
 }
 
 template<typename T, typename N>
-void IntervalTree<T,N>::TreePrintHelper(IntervalTree<T,N>::Node* x, std::stringstream &s) const {
+void IntervalTree<T,N>::TreePrintHelper(typename IntervalTree<T,N>::Node* x, std::stringstream &s) const {
   if (x != nil) {
     TreePrintHelper(x->left, s);
     s << x->str(nil,root);
@@ -616,7 +616,7 @@ std::string IntervalTree<T,N>::str() const {
 /***********************************************************************/
 
 template<typename T,typename N>
-void IntervalTree<T,N>::DeleteFixUp(IntervalTree<T,N>::Node* x) {
+void IntervalTree<T,N>::DeleteFixUp(typename IntervalTree<T,N>::Node* x) {
   typename IntervalTree<T,N>::Node * w;
   typename IntervalTree<T,N>::Node * rootLeft = root->left;
 
@@ -700,7 +700,7 @@ void IntervalTree<T,N>::DeleteFixUp(IntervalTree<T,N>::Node* x) {
 /***********************************************************************/
 
 template<typename T, typename N>
-T IntervalTree<T,N>::remove(IntervalTree<T,N>::Node * z){
+T IntervalTree<T,N>::remove(typename IntervalTree<T,N>::Node * z){
   typename IntervalTree<T,N>::Node* y;
   typename IntervalTree<T,N>::Node* x;
   T returnValue = z->value();
@@ -932,7 +932,7 @@ void IntervalTree<T,N>::fetch(N low, N high, std::vector<T> &enumResultStack)  {
 }
 
 template<typename T, typename N>
-T IntervalTree<T,N>::fetch_nearest_up(IntervalTree<T,N>::Node* x, N value)  {
+T IntervalTree<T,N>::fetch_nearest_up(typename IntervalTree<T,N>::Node* x, N value)  {
 
   if(x == nil)
     return T();
@@ -956,7 +956,7 @@ T IntervalTree<T,N>::fetch_nearest_up(N value)  {
 }
 
 template<typename T, typename N>
-typename IntervalTree<T,N>::Node* IntervalTree<T,N>::fetch_nearest_down(IntervalTree<T,N>::Node* x, N value)  {
+typename IntervalTree<T,N>::Node* IntervalTree<T,N>::fetch_nearest_down(typename IntervalTree<T,N>::Node* x, N value)  {
 
   if (x == nil)
     return NULL;
@@ -1156,7 +1156,7 @@ void IntervalTree<T,N>::fetch_window_node(
 }
 
 template<typename T, typename N>
-bool IntervalTree<T,N>::CheckMaxHighFieldsHelper(IntervalTree<T,N>::Node * y, 
+bool IntervalTree<T,N>::CheckMaxHighFieldsHelper(typename IntervalTree<T,N>::Node * y, 
                                     const N currentHigh,
                                     bool match) const
 {
@@ -1176,7 +1176,7 @@ bool IntervalTree<T,N>::CheckMaxHighFieldsHelper(IntervalTree<T,N>::Node * y,
 /* Make sure the maxHigh fields for everything makes sense. *
  * If something is wrong, print a warning and exit */
 template<typename T, typename N>
-void IntervalTree<T,N>::CheckMaxHighFields(IntervalTree<T,N>::Node * x) const {
+void IntervalTree<T,N>::CheckMaxHighFields(typename IntervalTree<T,N>::Node * x) const {
   if (x != nil) {
     CheckMaxHighFields(x->left);
     if(!(CheckMaxHighFieldsHelper(x,x->maxHigh,false) > 0)) {
