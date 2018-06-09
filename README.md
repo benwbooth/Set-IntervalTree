@@ -7,7 +7,7 @@ Set::IntervalTree - Perform range-based lookups on sets of ranges
 
 # VERSION
 
-version 0.11
+version 0.11\_01
 
 # SYNOPSIS
 
