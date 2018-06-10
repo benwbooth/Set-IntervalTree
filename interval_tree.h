@@ -858,23 +858,11 @@ N IntervalTree<T,N>::Contain(N a1, N a2, N b1, N b2) {
 
 template<typename T, typename N>
 void IntervalTree<T,N>::fetch(N low, N high, std::vector<T> &enumResultStack)  {
-  std::vector<IntervalTree<T,N>::Node*> stack;
-  // left first
-  stack.push_back(root->right);
-  stack.push_back(root->left);
-  
-  while (stack.size() > 0) {
-    IntervalTree<T,N>::Node* x = stack.back();
-    stack.pop_back();
-    if (x != nil) {
-      if (Overlap(low,high,x->key,x->high_) ) {
-        enumResultStack.push_back(x->value());
-      }
-      stack.push_back(x->right);
-      if (x->left->maxHigh >= low) {
-        stack.push_back(x->left);
-      }
-    }
+  typename std::vector<typename IntervalTree<T,N>::Node*> got;
+  fetch_node(low, high, got);
+  for (typename std::vector<typename IntervalTree<T,N>::Node*>::const_iterator 
+      i = got.begin(); i != got.end(); i++) {
+      enumResultStack.push_back((*i)->value());
   }
 }
 
@@ -981,23 +969,11 @@ void IntervalTree<T,N>::fetch_node(
 template<typename T, typename N>
 void IntervalTree<T,N>::fetch_window(N low, N high, std::vector<T> &enumResultStack)  
 {
-  std::vector<IntervalTree<T,N>::Node*> stack;
-  // left first
-  stack.push_back(root->right);
-  stack.push_back(root->left);
-  
-  while (stack.size() > 0) {
-    IntervalTree<T,N>::Node* x = stack.back();
-    stack.pop_back();
-    if (x != nil) {
-      if (Contain(low,high,x->key,x->high_) ) {
-        enumResultStack.push_back(x->value());
-      }
-      stack.push_back(x->right);
-      if (x->left->maxHigh >= low) {
-        stack.push_back(x->left);
-      }
-    }
+  typename std::vector<typename IntervalTree<T,N>::Node*> got;
+  fetch_window_node(low, high, got);
+  for (typename std::vector<typename IntervalTree<T,N>::Node*>::const_iterator 
+      i = got.begin(); i != got.end(); i++) {
+      enumResultStack.push_back((*i)->value());
   }
 }
 
