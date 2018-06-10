@@ -1,6 +1,6 @@
 Revision history for Perl extension Set::IntervalTree.
 
-0.11_01 Sat Jun  9 21:33:52 2018
+0.12    Sat Jun  9 21:33:52 2018
     - RT#123410 fix fetch_window()
     - RT#123098 try to support systems with clang++, like freebsd.
 
