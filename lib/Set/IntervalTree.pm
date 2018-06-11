@@ -81,7 +81,7 @@ __END__
 
   # remove only items overlapping location 100..200 with values 
   # less than 100;
-  my $removed = $tree->remove(100,200 sub {
+  my $removed = $tree->remove(100,200,sub {
     my ($item, $low, $high) = @_;
     return $item < 100;
   });
